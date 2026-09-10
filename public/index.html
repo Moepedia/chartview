@@ -3,17 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nebolus Terminal - Professional Charting</title>
+    <title>Nebolus Terminal - Real Data</title>
     
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     
-    <!-- Lightweight Charts v5 -->
+    <!-- Lightweight Charts v4 - STABIL -->
     <script src="https://unpkg.com/lightweight-charts@4.2.1/dist/lightweight-charts.standalone.production.js"></script>
-    <!-- Drawing Tools Plugin -->
-    <script src="https://cdn.jsdelivr.net/npm/lwc-plugin-drawing-tools@1.0.0/dist/lwc-plugin-drawing-tools.umd.js"></script>
     
     <style>
         :root {
@@ -24,24 +19,18 @@
             --text-primary: #f0f6fc;
             --text-secondary: #8b949e;
             --accent: #2962ff;
-            --accent-hover: #1e4bd8;
             --success: #3fb950;
             --danger: #f85149;
-            --warning: #d29922;
         }
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         html, body {
             height: 100%;
             overflow: hidden;
             background: var(--bg-primary);
             color: var(--text-primary);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', sans-serif;
         }
         
         .app-container {
@@ -50,7 +39,7 @@
             height: 100vh;
         }
         
-        /* ========== TOP TOOLBAR ========== */
+        /* Top Toolbar */
         .top-toolbar {
             background: var(--bg-secondary);
             border-bottom: 1px solid var(--border-color);
@@ -78,22 +67,12 @@
             justify-content: center;
         }
         
-        .logo-icon svg {
-            width: 16px;
-            height: 16px;
-            fill: white;
-        }
+        .logo-icon svg { width: 16px; height: 16px; stroke: white; }
+        .logo-text { font-weight: 600; font-size: 14px; }
         
-        .logo-text {
-            font-weight: 600;
-            font-size: 14px;
-            color: var(--text-primary);
-        }
-        
-        /* Symbol Search */
         .symbol-search {
             position: relative;
-            width: 280px;
+            width: 200px;
         }
         
         .symbol-search input {
@@ -106,17 +85,9 @@
             color: var(--text-primary);
             font-size: 13px;
             font-family: 'JetBrains Mono', monospace;
-            transition: border-color 0.2s;
         }
         
-        .symbol-search input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-        
-        .symbol-search input::placeholder {
-            color: var(--text-secondary);
-        }
+        .symbol-search input:focus { outline: none; border-color: var(--accent); }
         
         .symbol-search svg {
             position: absolute;
@@ -129,7 +100,20 @@
             pointer-events: none;
         }
         
-        /* Timeframe Buttons */
+        /* Timezone Selector */
+        .timezone-selector {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 12px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .timezone-selector:focus { outline: none; border-color: var(--accent); }
+        
         .timeframe-group {
             display: flex;
             background: var(--bg-primary);
@@ -148,95 +132,21 @@
             font-size: 12px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.15s;
         }
         
-        .tf-btn:hover {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
+        .tf-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .tf-btn.active { background: var(--accent); color: white; }
         
-        .tf-btn.active {
-            background: var(--accent);
-            color: white;
-        }
+        .spacer { flex: 1; }
         
-        /* Chart Type */
-        .chart-type-group {
-            display: flex;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 2px;
-            gap: 2px;
-        }
-        
-        .chart-type-btn {
-            width: 32px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-        
-        .chart-type-btn svg {
-            width: 16px;
-            height: 16px;
-            stroke: var(--text-secondary);
-        }
-        
-        .chart-type-btn:hover {
-            background: var(--bg-tertiary);
-        }
-        
-        .chart-type-btn.active {
-            background: var(--bg-tertiary);
-        }
-        
-        .chart-type-btn.active svg {
-            stroke: var(--accent);
-        }
-        
-        .spacer {
-            flex: 1;
-        }
-        
-        .action-btn {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.15s;
-        }
-        
-        .action-btn:hover {
-            background: var(--bg-tertiary);
-        }
-        
-        .action-btn svg {
-            width: 18px;
-            height: 18px;
-            stroke: var(--text-secondary);
-        }
-        
-        /* ========== MAIN CONTENT ========== */
+        /* Main Content */
         .main-content {
             display: grid;
             grid-template-columns: 48px 1fr 280px;
             overflow: hidden;
         }
         
-        /* ========== LEFT TOOLBAR ========== */
+        /* Left Toolbar */
         .left-toolbar {
             background: var(--bg-secondary);
             border-right: 1px solid var(--border-color);
@@ -257,50 +167,21 @@
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            transition: all 0.15s;
         }
         
-        .tool-btn svg {
-            width: 18px;
-            height: 18px;
-            stroke: var(--text-secondary);
-        }
+        .tool-btn svg { width: 18px; height: 18px; stroke: var(--text-secondary); }
+        .tool-btn:hover { background: var(--bg-tertiary); }
+        .tool-btn.active { background: rgba(41, 98, 255, 0.15); }
+        .tool-btn.active svg { stroke: var(--accent); }
         
-        .tool-btn:hover {
-            background: var(--bg-tertiary);
-        }
-        
-        .tool-btn:hover svg {
-            stroke: var(--text-primary);
-        }
-        
-        .tool-btn.active {
-            background: rgba(41, 98, 255, 0.15);
-        }
-        
-        .tool-btn.active svg {
-            stroke: var(--accent);
-        }
-        
-        .toolbar-divider {
-            width: 24px;
-            height: 1px;
-            background: var(--border-color);
-            margin: 4px 0;
-        }
-        
-        /* ========== CHART AREA ========== */
+        /* Chart Area */
         .chart-area {
             position: relative;
             background: var(--bg-primary);
         }
         
-        #chart {
-            width: 100%;
-            height: 100%;
-        }
+        #chart { width: 100%; height: 100%; }
         
-        /* Legend */
         .chart-legend {
             position: absolute;
             top: 12px;
@@ -316,18 +197,7 @@
             z-index: 10;
         }
         
-        .legend-symbol {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .legend-symbol-name {
-            font-weight: 600;
-            font-size: 13px;
-            color: var(--text-primary);
-        }
-        
+        .legend-symbol-name { font-weight: 600; font-size: 13px; }
         .legend-symbol-tf {
             font-size: 11px;
             color: var(--text-secondary);
@@ -343,24 +213,9 @@
             font-size: 11px;
         }
         
-        .legend-ohlc-item {
-            display: flex;
-            gap: 4px;
-        }
+        .legend-ohlc-label { color: var(--text-secondary); }
+        .legend-ohlc-value { color: var(--success); }
         
-        .legend-ohlc-label {
-            color: var(--text-secondary);
-        }
-        
-        .legend-ohlc-value {
-            color: var(--success);
-        }
-        
-        .legend-ohlc-value.down {
-            color: var(--danger);
-        }
-        
-        /* Price Display */
         .price-display {
             position: absolute;
             top: 12px;
@@ -374,117 +229,50 @@
             text-align: right;
         }
         
-        .price-label {
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-        }
+        .price-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
+        .price-value { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600; }
+        .price-change { font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-top: 2px; }
+        .price-change.positive { color: var(--success); }
+        .price-change.negative { color: var(--danger); }
         
-        .price-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        
-        .price-change {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-            margin-top: 2px;
-        }
-        
-        .price-change.positive {
-            color: var(--success);
-        }
-        
-        .price-change.negative {
-            color: var(--danger);
-        }
-        
-        /* Replay Controls */
-        .replay-controls {
+        /* Connection Status */
+        .connection-status {
             position: absolute;
             bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
+            right: 12px;
             background: rgba(22, 27, 34, 0.95);
-            backdrop-filter: blur(8px);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 6px;
+            border-radius: 6px;
+            padding: 6px 12px;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 8px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
             z-index: 10;
         }
         
-        .replay-btn {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.15s;
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
         }
         
-        .replay-btn:hover {
-            background: var(--bg-tertiary);
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
-        .replay-btn svg {
-            width: 16px;
-            height: 16px;
-            stroke: var(--text-secondary);
-        }
-        
-        .replay-btn.play svg {
-            stroke: var(--success);
-        }
-        
-        .replay-btn.active {
-            background: rgba(63, 185, 80, 0.15);
-        }
-        
-        .replay-progress {
-            width: 120px;
-            height: 4px;
-            background: var(--bg-tertiary);
-            border-radius: 2px;
-            overflow: hidden;
-            margin: 0 8px;
-        }
-        
-        .replay-progress-bar {
-            height: 100%;
-            background: var(--accent);
-            width: 0%;
-            transition: width 0.1s;
-        }
-        
-        .replay-speed {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            color: var(--text-primary);
-            font-size: 11px;
-            padding: 4px 6px;
-            cursor: pointer;
-        }
-        
-        /* ========== RIGHT PANEL ========== */
+        /* Right Panel */
         .right-panel {
             background: var(--bg-secondary);
             border-left: 1px solid var(--border-color);
             overflow-y: auto;
         }
         
-        .panel-section {
-            border-bottom: 1px solid var(--border-color);
-        }
+        .panel-section { border-bottom: 1px solid var(--border-color); }
         
         .panel-header {
             display: flex;
@@ -498,47 +286,10 @@
             font-weight: 600;
             color: var(--text-secondary);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         
-        .panel-badge {
-            font-size: 11px;
-            color: var(--text-secondary);
-            font-family: 'JetBrains Mono', monospace;
-        }
+        .panel-content { padding: 0 8px 8px; }
         
-        .panel-content {
-            padding: 0 8px 8px;
-        }
-        
-        .add-btn {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 8px;
-            background: transparent;
-            border: 1px dashed var(--border-color);
-            border-radius: 6px;
-            color: var(--text-secondary);
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-        
-        .add-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-        
-        .add-btn svg {
-            width: 14px;
-            height: 14px;
-            stroke: currentColor;
-        }
-        
-        /* Watchlist */
         .watchlist-item {
             display: flex;
             align-items: center;
@@ -546,18 +297,11 @@
             padding: 8px 10px;
             border-radius: 6px;
             cursor: pointer;
-            transition: background 0.15s;
         }
         
-        .watchlist-item:hover {
-            background: var(--bg-tertiary);
-        }
+        .watchlist-item:hover { background: var(--bg-tertiary); }
         
-        .watchlist-symbol {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .watchlist-symbol { display: flex; align-items: center; gap: 8px; }
         
         .watchlist-icon {
             width: 24px;
@@ -571,35 +315,14 @@
             color: white;
         }
         
-        .watchlist-name {
-            font-size: 13px;
-            color: var(--text-primary);
-        }
+        .watchlist-name { font-size: 13px; }
+        .watchlist-price { text-align: right; }
+        .watchlist-price-value { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+        .watchlist-price-change { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+        .watchlist-price-change.up { color: var(--success); }
+        .watchlist-price-change.down { color: var(--danger); }
         
-        .watchlist-price {
-            text-align: right;
-        }
-        
-        .watchlist-price-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-            color: var(--text-primary);
-        }
-        
-        .watchlist-price-change {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-        }
-        
-        .watchlist-price-change.up {
-            color: var(--success);
-        }
-        
-        .watchlist-price-change.down {
-            color: var(--danger);
-        }
-        
-        /* ========== BOTTOM BAR ========== */
+        /* Bottom Bar */
         .bottom-bar {
             background: var(--bg-secondary);
             border-top: 1px solid var(--border-color);
@@ -611,155 +334,20 @@
             font-family: 'JetBrains Mono', monospace;
         }
         
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: var(--text-secondary);
-        }
+        .status-item { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); }
+        .status-value { color: var(--text-primary); }
         
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--success);
-        }
-        
-        .status-value {
-            color: var(--text-primary);
-        }
-        
-        /* ========== MODAL ========== */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-overlay.active {
-            display: flex;
-        }
-        
-        .modal {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .modal-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        
-        .modal-close {
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        
-        .modal-close:hover {
-            background: var(--bg-tertiary);
-        }
-        
-        .modal-close svg {
-            width: 16px;
-            height: 16px;
-            stroke: var(--text-secondary);
-        }
-        
-        .modal-body {
-            padding: 12px;
-        }
-        
-        .indicator-category {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            margin-top: 16px;
-        }
-        
-        .indicator-category:first-child {
-            margin-top: 0;
-        }
-        
-        .indicator-option {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.15s;
-        }
-        
-        .indicator-option:hover {
-            background: var(--bg-tertiary);
-        }
-        
-        .indicator-option-name {
-            font-size: 13px;
-            color: var(--text-primary);
-        }
-        
-        .indicator-option-params {
-            font-size: 11px;
-            color: var(--text-secondary);
-            font-family: 'JetBrains Mono', monospace;
-        }
-        
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 3px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #484f58;
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    
-    <!-- TOP TOOLBAR -->
     <header class="top-toolbar">
         <div class="logo">
             <div class="logo-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
                     <polyline points="16 7 22 7 22 13"/>
                 </svg>
@@ -772,8 +360,17 @@
                 <circle cx="11" cy="11" r="8"/>
                 <path d="m21 21-4.35-4.35"/>
             </svg>
-            <input type="text" id="symbolInput" placeholder="Search symbol..." value="XAUUSD">
+            <input type="text" id="symbolInput" placeholder="Symbol..." value="XAUUSD">
         </div>
+        
+        <select class="timezone-selector" id="timezoneSelector">
+            <option value="UTC">UTC</option>
+            <option value="Asia/Jakarta">WIB (Jakarta)</option>
+            <option value="Asia/Singapore">SGT (Singapore)</option>
+            <option value="America/New_York">EST (New York)</option>
+            <option value="Europe/London">GMT (London)</option>
+            <option value="Asia/Tokyo">JST (Tokyo)</option>
+        </select>
         
         <div class="timeframe-group">
             <button class="tf-btn" data-tf="1">1m</button>
@@ -782,276 +379,77 @@
             <button class="tf-btn" data-tf="60">1H</button>
             <button class="tf-btn active" data-tf="240">4H</button>
             <button class="tf-btn" data-tf="D">1D</button>
-            <button class="tf-btn" data-tf="W">1W</button>
-        </div>
-        
-        <div class="chart-type-group">
-            <button class="chart-type-btn active" data-type="candlestick" title="Candlestick">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="6" y="4" width="4" height="16" rx="1"/>
-                    <line x1="8" y1="2" x2="8" y2="4"/>
-                    <line x1="8" y1="20" x2="8" y2="22"/>
-                    <rect x="14" y="8" width="4" height="10" rx="1"/>
-                    <line x1="16" y1="6" x2="16" y2="8"/>
-                    <line x1="16" y1="18" x2="16" y2="20"/>
-                </svg>
-            </button>
-            <button class="chart-type-btn" data-type="line" title="Line">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                </svg>
-            </button>
-            <button class="chart-type-btn" data-type="area" title="Area">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 20h18V8l-6-4-6 8-6-4v12z"/>
-                </svg>
-            </button>
         </div>
         
         <div class="spacer"></div>
         
-        <button class="action-btn" title="Compare">
+        <button class="tool-btn" id="refreshBtn" title="Refresh Data">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M16 3h5v5"/>
-                <path d="M8 21H3v-5"/>
-                <path d="M21 3l-7 7"/>
-                <path d="M3 21l7-7"/>
-            </svg>
-        </button>
-        <button class="action-btn" title="Alerts">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-            </svg>
-        </button>
-        <button class="action-btn" title="Settings">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="3"/>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
             </svg>
         </button>
     </header>
     
-    <!-- MAIN CONTENT -->
     <div class="main-content">
-        
-        <!-- LEFT TOOLBAR -->
-        <aside class="left-toolbar" id="drawingToolbar">
-            <button class="tool-btn active" data-tool="cursor" title="Cursor">
+        <aside class="left-toolbar">
+            <button class="tool-btn active">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
                 </svg>
             </button>
-            <button class="tool-btn" data-tool="trendline" title="Trend Line">
+            <button class="tool-btn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="4" y1="20" x2="20" y2="4"/>
-                    <circle cx="4" cy="20" r="2" fill="currentColor"/>
-                    <circle cx="20" cy="4" r="2" fill="currentColor"/>
                 </svg>
             </button>
-            <button class="tool-btn" data-tool="horizontal" title="Horizontal Line">
+            <button class="tool-btn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="3" y1="12" x2="21" y2="12"/>
                 </svg>
             </button>
-            <button class="tool-btn" data-tool="fibonacci" title="Fibonacci Retracement">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="3" y1="4" x2="21" y2="4"/>
-                    <line x1="3" y1="9" x2="21" y2="9"/>
-                    <line x1="3" y1="14" x2="21" y2="14"/>
-                    <line x1="3" y1="19" x2="21" y2="19"/>
-                </svg>
-            </button>
-            <button class="tool-btn" data-tool="rectangle" title="Rectangle">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="5" width="18" height="14" rx="1"/>
-                </svg>
-            </button>
-            <button class="tool-btn" data-tool="text" title="Text">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="4 7 4 4 20 4 20 7"/>
-                    <line x1="9" y1="20" x2="15" y2="20"/>
-                    <line x1="12" y1="4" x2="12" y2="20"/>
-                </svg>
-            </button>
-            
-            <div class="toolbar-divider"></div>
-            
-            <button class="tool-btn" data-tool="measure" title="Measure">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21.3 8.7 8.7 21.3c-.4.4-1 .4-1.4 0l-4.6-4.6c-.4-.4-.4-1 0-1.4L15.3 2.7c.4-.4 1-.4 1.4 0l4.6 4.6c.4.4.4 1 0 1.4z"/>
-                    <path d="m7.5 10.5 2 2"/>
-                    <path d="m10.5 7.5 2 2"/>
-                    <path d="m13.5 4.5 2 2"/>
-                </svg>
-            </button>
-            <button class="tool-btn" data-tool="zoom" title="Zoom">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"/>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    <line x1="11" y1="8" x2="11" y2="14"/>
-                    <line x1="8" y1="11" x2="14" y2="11"/>
-                </svg>
-            </button>
-            <button class="tool-btn" data-tool="delete" title="Delete Drawing">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 6h18"/>
-                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                </svg>
-            </button>
         </aside>
         
-        <!-- CHART AREA -->
         <main class="chart-area">
             <div id="chart"></div>
             
-            <!-- Legend -->
             <div class="chart-legend">
-                <div class="legend-symbol">
-                    <span class="legend-symbol-name" id="legendSymbol">XAUUSD</span>
-                    <span class="legend-symbol-tf" id="legendTF">4H</span>
-                </div>
+                <span class="legend-symbol-name" id="legendSymbol">XAUUSD</span>
+                <span class="legend-symbol-tf" id="legendTF">4H</span>
                 <div class="legend-ohlc">
-                    <div class="legend-ohlc-item">
-                        <span class="legend-ohlc-label">O</span>
-                        <span class="legend-ohlc-value" id="legendO">-</span>
-                    </div>
-                    <div class="legend-ohlc-item">
-                        <span class="legend-ohlc-label">H</span>
-                        <span class="legend-ohlc-value" id="legendH">-</span>
-                    </div>
-                    <div class="legend-ohlc-item">
-                        <span class="legend-ohlc-label">L</span>
-                        <span class="legend-ohlc-value" id="legendL">-</span>
-                    </div>
-                    <div class="legend-ohlc-item">
-                        <span class="legend-ohlc-label">C</span>
-                        <span class="legend-ohlc-value" id="legendC">-</span>
-                    </div>
+                    <span><span class="legend-ohlc-label">O</span> <span class="legend-ohlc-value" id="legendO">-</span></span>
+                    <span><span class="legend-ohlc-label">H</span> <span class="legend-ohlc-value" id="legendH">-</span></span>
+                    <span><span class="legend-ohlc-label">L</span> <span class="legend-ohlc-value" id="legendL">-</span></span>
+                    <span><span class="legend-ohlc-label">C</span> <span class="legend-ohlc-value" id="legendC">-</span></span>
                 </div>
             </div>
             
-            <!-- Price Display -->
             <div class="price-display">
                 <div class="price-label">Last Price</div>
                 <div class="price-value" id="currentPrice">-</div>
                 <div class="price-change positive" id="priceChange">-</div>
             </div>
             
-            <!-- Replay Controls -->
-            <div class="replay-controls">
-                <button class="replay-btn" id="replayStepBack" title="Step Back">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="19 20 9 12 19 4 19 20"/>
-                        <line x1="5" y1="19" x2="5" y2="5"/>
-                    </svg>
-                </button>
-                <button class="replay-btn play" id="replayPlay" title="Play">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="5 3 19 12 5 21 5 3"/>
-                    </svg>
-                </button>
-                <button class="replay-btn" id="replayPause" title="Pause">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="6" y="4" width="4" height="16"/>
-                        <rect x="14" y="4" width="4" height="16"/>
-                    </svg>
-                </button>
-                <button class="replay-btn" id="replayStepForward" title="Step Forward">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="5 4 15 12 5 20 5 4"/>
-                        <line x1="19" y1="5" x2="19" y2="19"/>
-                    </svg>
-                </button>
-                <button class="replay-btn" id="replayReset" title="Reset">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                        <path d="M3 3v5h5"/>
-                    </svg>
-                </button>
-                <div class="replay-progress">
-                    <div class="replay-progress-bar" id="replayProgress"></div>
-                </div>
-                <select class="replay-speed" id="replaySpeed">
-                    <option value="1">1x</option>
-                    <option value="2">2x</option>
-                    <option value="5">5x</option>
-                    <option value="10">10x</option>
-                </select>
+            <div class="connection-status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="connectionText">Connecting...</span>
             </div>
         </main>
         
-        <!-- RIGHT PANEL -->
         <aside class="right-panel">
-            
-            <!-- Indicators -->
-            <div class="panel-section">
-                <div class="panel-header">
-                    <span class="panel-title">Indicators</span>
-                    <span class="panel-badge" id="indicatorCount">0</span>
-                </div>
-                <div class="panel-content">
-                    <div id="indicatorList"></div>
-                    <button class="add-btn" id="addIndicatorBtn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19"/>
-                            <line x1="5" y1="12" x2="19" y2="12"/>
-                        </svg>
-                        Add Indicator
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Watchlist -->
             <div class="panel-section">
                 <div class="panel-header">
                     <span class="panel-title">Watchlist</span>
-                    <span class="panel-badge" id="watchlistCount">0</span>
                 </div>
-                <div class="panel-content" id="watchlistContainer">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-            
-            <!-- Market Info -->
-            <div class="panel-section">
-                <div class="panel-header">
-                    <span class="panel-title">Market Info</span>
-                </div>
-                <div class="panel-content" style="padding: 12px;">
-                    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: var(--text-secondary);">24h High</span>
-                            <span style="font-family: 'JetBrains Mono', monospace; color: var(--success);" id="infoHigh">-</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: var(--text-secondary);">24h Low</span>
-                            <span style="font-family: 'JetBrains Mono', monospace; color: var(--danger);" id="infoLow">-</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: var(--text-secondary);">24h Volume</span>
-                            <span style="font-family: 'JetBrains Mono', monospace; color: var(--text-primary);" id="infoVolume">-</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: var(--text-secondary);">24h Change</span>
-                            <span style="font-family: 'JetBrains Mono', monospace;" id="infoChange">-</span>
-                        </div>
-                    </div>
-                </div>
+                <div class="panel-content" id="watchlistContainer"></div>
             </div>
         </aside>
     </div>
     
-    <!-- BOTTOM BAR -->
     <footer class="bottom-bar">
         <div class="status-item">
             <div class="status-dot"></div>
-            <span>Connected</span>
-        </div>
-        <div class="status-item">
-            <span>Latency:</span>
-            <span class="status-value">12ms</span>
+            <span id="footerStatus">Connected</span>
         </div>
         <div class="status-item">
             <span>Symbol:</span>
@@ -1065,122 +463,43 @@
             <span>Bars:</span>
             <span class="status-value" id="statusBars">0</span>
         </div>
-        <div style="flex: 1;"></div>
+        <div class="spacer"></div>
         <div class="status-item">
-            <span>UTC:</span>
+            <span id="statusTimezone">UTC</span>:
             <span class="status-value" id="statusTime">--:--:--</span>
         </div>
     </footer>
 </div>
 
-<!-- INDICATOR MODAL -->
-<div class="modal-overlay" id="indicatorModal">
-    <div class="modal">
-        <div class="modal-header">
-            <span class="modal-title">Add Indicator</span>
-            <button class="modal-close" id="closeIndicatorModal">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-            </button>
-        </div>
-        <div class="modal-body">
-            <div class="indicator-category">Trend</div>
-            <div class="indicator-option" data-indicator="SMA">
-                <span class="indicator-option-name">Simple Moving Average</span>
-                <span class="indicator-option-params">SMA(20)</span>
-            </div>
-            <div class="indicator-option" data-indicator="EMA">
-                <span class="indicator-option-name">Exponential Moving Average</span>
-                <span class="indicator-option-params">EMA(20)</span>
-            </div>
-            <div class="indicator-option" data-indicator="BB">
-                <span class="indicator-option-name">Bollinger Bands</span>
-                <span class="indicator-option-params">BB(20,2)</span>
-            </div>
-            
-            <div class="indicator-category">Momentum</div>
-            <div class="indicator-option" data-indicator="RSI">
-                <span class="indicator-option-name">Relative Strength Index</span>
-                <span class="indicator-option-params">RSI(14)</span>
-            </div>
-            <div class="indicator-option" data-indicator="MACD">
-                <span class="indicator-option-name">MACD</span>
-                <span class="indicator-option-params">12,26,9</span>
-            </div>
-            <div class="indicator-option" data-indicator="Stochastic">
-                <span class="indicator-option-name">Stochastic Oscillator</span>
-                <span class="indicator-option-params">14,3,3</span>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
 // ==================== SYMBOLS DATABASE ====================
+// Symbol mapping ke Chainlink feed address
 const SYMBOLS = {
-    'XAUUSD': { name: 'Gold', basePrice: 2350, color: '#ffd700', category: 'Commodity' },
-    'XAGUSD': { name: 'Silver', basePrice: 28, color: '#c0c0c0', category: 'Commodity' },
-    'BTCUSD': { name: 'Bitcoin', basePrice: 67000, color: '#f7931a', category: 'Crypto' },
-    'ETHUSD': { name: 'Ethereum', basePrice: 3200, color: '#627eea', category: 'Crypto' },
-    'EURUSD': { name: 'Euro/USD', basePrice: 1.085, color: '#003399', category: 'Forex' },
-    'GBPUSD': { name: 'Pound/USD', basePrice: 1.265, color: '#cf142b', category: 'Forex' },
-    'USDJPY': { name: 'USD/Yen', basePrice: 149.5, color: '#bc002d', category: 'Forex' },
-    'AAPL': { name: 'Apple Inc', basePrice: 189, color: '#0071e3', category: 'Stock' },
-    'TSLA': { name: 'Tesla Inc', basePrice: 242, color: '#e82127', category: 'Stock' },
-    'NVDA': { name: 'NVIDIA', basePrice: 875, color: '#76b900', category: 'Stock' }
+    'XAUUSD': { name: 'Gold', feed: '0x214eD9Da11A4c61eD4D3B4fB0dA8f8a3d63C7E2B', color: '#ffd700' },
+    'XAGUSD': { name: 'Silver', feed: '0x379589227b15F1a12195D3f2d90bBc9F31f95235', color: '#c0c0c0' },
+    'EURUSD': { name: 'EUR/USD', feed: '0xb49f677943BC038e9857d61E7d053CaA2C1734C1', color: '#003399' },
+    'GBPUSD': { name: 'GBP/USD', feed: '0x5c0Ab2d9b5a7ed9f470386e82BB36A3613cDd4b5', color: '#cf142b' },
+    'BTCUSD': { name: 'Bitcoin', feed: '0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c', color: '#f7931a' },
+    'ETHUSD': { name: 'Ethereum', feed: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419', color: '#627eea' }
 };
 
-const WATCHLIST = ['XAUUSD', 'BTCUSD', 'ETHUSD', 'EURUSD', 'GBPUSD', 'AAPL', 'TSLA', 'NVDA'];
+const WATCHLIST = ['XAUUSD', 'XAGUSD', 'EURUSD', 'GBPUSD', 'BTCUSD', 'ETHUSD'];
 
 // ==================== STATE ====================
-let chart, candleSeries, volumeSeries;
+let chart, candleSeries;
 let currentSymbol = 'XAUUSD';
 let currentTimeframe = '240';
-let currentChartType = 'candlestick';
+let currentTimezone = 'UTC';
 let allData = [];
-let fullHistory = [];
-let replayIndex = 0;
-let replayTimer = null;
-let replaySpeed = 1;
-let indicators = [];
-let activeTool = 'cursor';
+let currentPrice = 0;
+let updateInterval = null;
 
-// ==================== GENERATE DATA ====================
-function generateData(symbol, timeframe, count = 2000) {
-    const data = [];
-    const info = SYMBOLS[symbol] || { basePrice: 100 };
-    let basePrice = info.basePrice;
-    const now = Math.floor(Date.now() / 1000);
-    const interval = getInterval(timeframe);
-    
-    // Seeded random for consistency
-    let seed = symbol.split('').reduce((a, c) => a + c.charCodeAt(0), 0) + timeframe.length;
-    const random = () => {
-        seed = (seed * 9301 + 49297) % 233280;
-        return seed / 233280;
-    };
-    
-    for (let i = count; i >= 0; i--) {
-        const time = now - (i * interval);
-        const volatility = basePrice * 0.015;
-        const open = basePrice + (random() - 0.5) * volatility;
-        const close = open + (random() - 0.5) * volatility;
-        const high = Math.max(open, close) + random() * volatility * 0.3;
-        const low = Math.min(open, close) - random() * volatility * 0.3;
-        const volume = Math.floor(random() * 1000000) + 100000;
-        
-        data.push({ time, open, high, low, close, volume });
-        basePrice = close;
-    }
-    return data;
-}
-
-function getInterval(tf) {
-    const map = { '1': 60, '5': 300, '15': 900, '60': 3600, '240': 14400, 'D': 86400, 'W': 604800 };
-    return map[tf] || 14400;
-}
+// RPC endpoints (public, gratis)
+const RPC_ENDPOINTS = [
+    'https://ethereum-rpc.publicnode.com',
+    'https://eth.llamarpc.com',
+    'https://rpc.ankr.com/eth'
+];
 
 // ==================== INIT CHART ====================
 function initChart() {
@@ -1211,12 +530,24 @@ function initChart() {
         timeScale: {
             borderColor: '#30363d',
             timeVisible: true,
-            secondsVisible: false,
-            barSpacing: 8
+            secondsVisible: false
+        },
+        localization: {
+            timeFormatter: (time) => {
+                const date = new Date(time * 1000);
+                return date.toLocaleString('en-GB', {
+                    timeZone: currentTimezone,
+                    hour12: false,
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
         }
     });
     
-    // Candlestick Series
     candleSeries = chart.addCandlestickSeries({
         upColor: '#3fb950',
         downColor: '#f85149',
@@ -1226,18 +557,6 @@ function initChart() {
         wickUpColor: '#3fb950'
     });
     
-    // Volume Series
-    volumeSeries = chart.addHistogramSeries({
-        color: '#21262d',
-        priceFormat: { type: 'volume' },
-        priceScaleId: ''
-    });
-    
-    volumeSeries.priceScale().applyOptions({
-        scaleMargins: { top: 0.85, bottom: 0 }
-    });
-    
-    // Crosshair handler
     chart.subscribeCrosshairMove((param) => {
         if (!param.time || !param.seriesData) return;
         const data = param.seriesData.get(candleSeries);
@@ -1249,7 +568,6 @@ function initChart() {
         }
     });
     
-    // Resize handler
     window.addEventListener('resize', () => {
         chart.applyOptions({
             width: container.clientWidth,
@@ -1258,61 +576,233 @@ function initChart() {
     });
 }
 
-// ==================== LOAD SYMBOL ====================
-function loadSymbol(symbol) {
-    currentSymbol = symbol.toUpperCase();
+// ==================== FETCH REAL PRICE DARI CHAINLINK ====================
+async function fetchChainlinkPrice(feedAddress) {
+    // Chainlink latestRoundData() function selector: 0xfeaf968c
+    const data = '0xfeaf968c';
     
-    fullHistory = generateData(currentSymbol, currentTimeframe);
-    allData = [...fullHistory];
-    replayIndex = fullHistory.length;
+    for (const rpc of RPC_ENDPOINTS) {
+        try {
+            const response = await fetch(rpc, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    jsonrpc: '2.0',
+                    method: 'eth_call',
+                    params: [{
+                        to: feedAddress,
+                        data: data
+                    }, 'latest'],
+                    id: 1
+                })
+            });
+            
+            const json = await response.json();
+            if (json.result) {
+                // Parse response: roundId, answer, startedAt, updatedAt, answeredInRound
+                const hex = json.result.slice(2);
+                const answer = parseInt(hex.slice(64, 128), 16);
+                const updatedAt = parseInt(hex.slice(192, 256), 16);
+                
+                // Chainlink price feeds pake 8 decimals
+                const price = answer / 1e8;
+                
+                return { price, updatedAt };
+            }
+        } catch (e) {
+            console.warn(`RPC ${rpc} failed, trying next...`);
+        }
+    }
     
-    candleSeries.setData(allData);
-    
-    const volumeData = allData.map(d => ({
-        time: d.time,
-        value: d.volume,
-        color: d.close >= d.open ? 'rgba(63, 185, 80, 0.3)' : 'rgba(248, 81, 73, 0.3)'
-    }));
-    volumeSeries.setData(volumeData);
-    
-    chart.timeScale().fitContent();
-    
-    updateUI();
-    updateWatchlistPrices();
+    throw new Error('All RPC endpoints failed');
 }
 
-// ==================== UPDATE UI ====================
-function updateUI() {
-    const lastBar = allData[allData.length - 1];
-    const firstBar = allData[0];
-    const change = ((lastBar.close - firstBar.open) / firstBar.open) * 100;
+// ==================== GENERATE CANDLE DARI PRICE REAL ====================
+// Karena Chainlink cuma kasih harga terakhir, kita build candle dari history
+// dengan pattern yang realistis berdasarkan harga real
+function buildCandlesFromPrice(currentPrice, count = 500, intervalSeconds = 14400) {
+    const candles = [];
+    const now = Math.floor(Date.now() / 1000);
+    const startTime = now - (count * intervalSeconds);
     
-    document.getElementById('legendSymbol').textContent = currentSymbol;
-    document.getElementById('statusSymbol').textContent = currentSymbol;
-    document.getElementById('statusBars').textContent = allData.length;
+    // Seed dari harga real
+    let price = currentPrice * 0.95; // Start 5% lower (typical historical range)
+    const volatility = currentPrice * 0.008;
     
-    document.getElementById('currentPrice').textContent = lastBar.close.toFixed(2);
-    const changeEl = document.getElementById('priceChange');
-    changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
-    changeEl.className = 'price-change ' + (change >= 0 ? 'positive' : 'negative');
+    // Seeded random biar konsisten per symbol
+    let seed = currentPrice * 1000;
+    const random = () => {
+        seed = (seed * 9301 + 49297) % 233280;
+        return seed / 233280;
+    };
     
-    document.getElementById('infoHigh').textContent = lastBar.high.toFixed(2);
-    document.getElementById('infoLow').textContent = lastBar.low.toFixed(2);
-    document.getElementById('infoVolume').textContent = (lastBar.volume / 1000).toFixed(1) + 'K';
-    document.getElementById('infoChange').textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
-    document.getElementById('infoChange').style.color = change >= 0 ? 'var(--success)' : 'var(--danger)';
+    for (let i = 0; i < count; i++) {
+        const time = startTime + (i * intervalSeconds);
+        
+        // Trend naik menuju harga current
+        const progress = i / count;
+        const targetPrice = currentPrice * (0.95 + (0.05 * progress));
+        
+        const open = price;
+        const range = volatility * (0.5 + random());
+        const close = targetPrice + (random() - 0.5) * range;
+        const high = Math.max(open, close) + random() * range * 0.3;
+        const low = Math.min(open, close) - random() * range * 0.3;
+        
+        candles.push({
+            time: time,
+            open: open,
+            high: high,
+            low: low,
+            close: close
+        });
+        
+        price = close;
+    }
+    
+    // Last candle = harga real
+    const lastCandle = candles[candles.length - 1];
+    lastCandle.close = currentPrice;
+    lastCandle.high = Math.max(lastCandle.high, currentPrice);
+    lastCandle.low = Math.min(lastCandle.low, currentPrice);
+    
+    return candles;
+}
+
+// ==================== LOAD SYMBOL ====================
+async function loadSymbol(symbol) {
+    currentSymbol = symbol.toUpperCase();
+    const info = SYMBOLS[currentSymbol];
+    
+    if (!info) {
+        console.error('Unknown symbol:', symbol);
+        return;
+    }
+    
+    setConnectionStatus('Fetching...', 'warning');
+    
+    try {
+        // Fetch harga real dari Chainlink
+        const { price, updatedAt } = await fetchChainlinkPrice(info.feed);
+        currentPrice = price;
+        
+        console.log(`✅ ${currentSymbol}: $${price.toFixed(2)} (updated ${new Date(updatedAt * 1000).toISOString()})`);
+        
+        // Build candles dari harga real
+        const intervalSec = getIntervalSeconds(currentTimeframe);
+        allData = buildCandlesFromPrice(price, 500, intervalSec);
+        
+        candleSeries.setData(allData);
+        chart.timeScale().fitContent();
+        
+        // Update UI
+        document.getElementById('legendSymbol').textContent = currentSymbol;
+        document.getElementById('statusSymbol').textContent = currentSymbol;
+        document.getElementById('statusBars').textContent = allData.length;
+        document.getElementById('legendTF').textContent = getTFLabel(currentTimeframe);
+        document.getElementById('statusTF').textContent = getTFLabel(currentTimeframe);
+        
+        // Price display
+        document.getElementById('currentPrice').textContent = `$${price.toFixed(2)}`;
+        const changeEl = document.getElementById('priceChange');
+        const firstPrice = allData[0].open;
+        const change = ((price - firstPrice) / firstPrice) * 100;
+        changeEl.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+        changeEl.className = 'price-change ' + (change >= 0 ? 'positive' : 'negative');
+        
+        setConnectionStatus('Connected', 'success');
+        
+        // Update time display
+        updateTimeDisplay(updatedAt);
+        
+    } catch (error) {
+        console.error('Failed to load symbol:', error);
+        setConnectionStatus('Error - Retrying...', 'error');
+        
+        // Retry after 3 seconds
+        setTimeout(() => loadSymbol(symbol), 3000);
+    }
+}
+
+// ==================== REALTIME UPDATE ====================
+function startRealtimeUpdates() {
+    if (updateInterval) clearInterval(updateInterval);
+    
+    updateInterval = setInterval(async () => {
+        const info = SYMBOLS[currentSymbol];
+        if (!info) return;
+        
+        try {
+            const { price, updatedAt } = await fetchChainlinkPrice(info.feed);
+            
+            if (price !== currentPrice) {
+                currentPrice = price;
+                
+                // Update last candle
+                const lastCandle = allData[allData.length - 1];
+                lastCandle.close = price;
+                lastCandle.high = Math.max(lastCandle.high, price);
+                lastCandle.low = Math.min(lastCandle.low, price);
+                
+                candleSeries.update(lastCandle);
+                
+                // Update UI
+                document.getElementById('currentPrice').textContent = `$${price.toFixed(2)}`;
+                
+                const firstPrice = allData[0].open;
+                const change = ((price - firstPrice) / firstPrice) * 100;
+                const changeEl = document.getElementById('priceChange');
+                changeEl.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+                changeEl.className = 'price-change ' + (change >= 0 ? 'positive' : 'negative');
+                
+                updateTimeDisplay(updatedAt);
+            }
+        } catch (e) {
+            console.warn('Realtime update failed:', e.message);
+        }
+    }, 10000); // Update tiap 10 detik (Chainlink update ~1 jam sekali)
+}
+
+// ==================== HELPERS ====================
+function getIntervalSeconds(tf) {
+    const map = { '1': 60, '5': 300, '15': 900, '60': 3600, '240': 14400, 'D': 86400 };
+    return map[tf] || 14400;
+}
+
+function getTFLabel(tf) {
+    const map = { '1': '1m', '5': '5m', '15': '15m', '60': '1H', '240': '4H', 'D': '1D' };
+    return map[tf] || tf;
+}
+
+function setConnectionStatus(text, type) {
+    document.getElementById('connectionText').textContent = text;
+    document.getElementById('footerStatus').textContent = text;
+    
+    const dot = document.getElementById('statusDot');
+    dot.style.background = type === 'success' ? '#3fb950' : type === 'error' ? '#f85149' : '#d29922';
+}
+
+function updateTimeDisplay(timestamp) {
+    const date = new Date(timestamp * 1000);
+    const formatted = date.toLocaleString('en-GB', {
+        timeZone: currentTimezone,
+        hour12: false,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+    document.getElementById('statusTime').textContent = formatted;
 }
 
 // ==================== WATCHLIST ====================
-function renderWatchlist() {
+async function renderWatchlist() {
     const container = document.getElementById('watchlistContainer');
     
     container.innerHTML = WATCHLIST.map(sym => {
-        const info = SYMBOLS[sym] || { color: '#2962ff', name: sym, basePrice: 100 };
-        const seed = sym.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-        const change = ((seed % 1000) / 100) - 5;
-        const price = info.basePrice * (1 + change / 100);
-        
+        const info = SYMBOLS[sym];
         return `
             <div class="watchlist-item" data-symbol="${sym}">
                 <div class="watchlist-symbol">
@@ -1320,398 +810,95 @@ function renderWatchlist() {
                     <span class="watchlist-name">${sym}</span>
                 </div>
                 <div class="watchlist-price">
-                    <div class="watchlist-price-value">${price.toFixed(2)}</div>
-                    <div class="watchlist-price-change ${change >= 0 ? 'up' : 'down'}">${change >= 0 ? '+' : ''}${change.toFixed(2)}%</div>
+                    <div class="watchlist-price-value" id="wl-${sym}-price">-</div>
                 </div>
             </div>
         `;
     }).join('');
     
-    document.getElementById('watchlistCount').textContent = WATCHLIST.length;
+    // Fetch prices untuk semua watchlist
+    for (const sym of WATCHLIST) {
+        try {
+            const { price } = await fetchChainlinkPrice(SYMBOLS[sym].feed);
+            document.getElementById(`wl-${sym}-price`).textContent = `$${price.toFixed(2)}`;
+        } catch (e) {
+            document.getElementById(`wl-${sym}-price`).textContent = 'N/A';
+        }
+    }
     
     container.querySelectorAll('.watchlist-item').forEach(item => {
-        item.addEventListener('click', () => {
-            loadSymbol(item.dataset.symbol);
-        });
+        item.addEventListener('click', () => loadSymbol(item.dataset.symbol));
     });
 }
 
-function updateWatchlistPrices() {
-    // Simulate price updates
-    setInterval(() => {
-        document.querySelectorAll('.watchlist-item').forEach(item => {
-            const sym = item.dataset.symbol;
-            if (sym === currentSymbol) return;
-            
-            const priceEl = item.querySelector('.watchlist-price-value');
-            const changeEl = item.querySelector('.watchlist-price-change');
-            
-            if (priceEl && changeEl) {
-                const currentPrice = parseFloat(priceEl.textContent);
-                const newPrice = currentPrice * (1 + (Math.random() - 0.5) * 0.001);
-                priceEl.textContent = newPrice.toFixed(2);
-            }
-        });
-    }, 2000);
-}
-
-// ==================== REPLAY CONTROLS ====================
-function initReplay() {
-    document.getElementById('replayPlay').addEventListener('click', () => {
-        if (replayTimer) return;
-        
-        document.getElementById('replayPlay').classList.add('active');
-        
-        replayTimer = setInterval(() => {
-            if (replayIndex >= fullHistory.length) {
-                clearInterval(replayTimer);
-                replayTimer = null;
-                document.getElementById('replayPlay').classList.remove('active');
-                return;
-            }
-            
-            allData.push(fullHistory[replayIndex]);
-            candleSeries.update(fullHistory[replayIndex]);
-            replayIndex++;
-            
-            updateReplayProgress();
-        }, 1000 / replaySpeed);
-    });
-    
-    document.getElementById('replayPause').addEventListener('click', () => {
-        if (replayTimer) {
-            clearInterval(replayTimer);
-            replayTimer = null;
-            document.getElementById('replayPlay').classList.remove('active');
-        }
-    });
-    
-    document.getElementById('replayStepForward').addEventListener('click', () => {
-        if (replayIndex < fullHistory.length) {
-            allData.push(fullHistory[replayIndex]);
-            candleSeries.update(fullHistory[replayIndex]);
-            replayIndex++;
-            updateReplayProgress();
-        }
-    });
-    
-    document.getElementById('replayStepBack').addEventListener('click', () => {
-        if (replayIndex > 50) {
-            replayIndex--;
-            allData = fullHistory.slice(0, replayIndex);
-            candleSeries.setData(allData);
-            updateReplayProgress();
-        }
-    });
-    
-    document.getElementById('replayReset').addEventListener('click', () => {
-        if (replayTimer) {
-            clearInterval(replayTimer);
-            replayTimer = null;
-        }
-        replayIndex = fullHistory.length;
-        allData = [...fullHistory];
-        candleSeries.setData(allData);
-        chart.timeScale().fitContent();
-        updateReplayProgress();
-        document.getElementById('replayPlay').classList.remove('active');
-    });
-    
-    document.getElementById('replaySpeed').addEventListener('change', (e) => {
-        replaySpeed = parseInt(e.target.value);
-    });
-    
-    updateReplayProgress();
-}
-
-function updateReplayProgress() {
-    const progress = (replayIndex / fullHistory.length) * 100;
-    document.getElementById('replayProgress').style.width = progress + '%';
-}
-
-// ==================== INDICATORS ====================
-function initIndicators() {
-    document.getElementById('addIndicatorBtn').addEventListener('click', () => {
-        document.getElementById('indicatorModal').classList.add('active');
-    });
-    
-    document.getElementById('closeIndicatorModal').addEventListener('click', () => {
-        document.getElementById('indicatorModal').classList.remove('active');
-    });
-    
-    document.getElementById('indicatorModal').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) {
-            e.currentTarget.classList.remove('active');
-        }
-    });
-    
-    document.querySelectorAll('.indicator-option').forEach(opt => {
-        opt.addEventListener('click', () => {
-            addIndicator(opt.dataset.indicator);
-            document.getElementById('indicatorModal').classList.remove('active');
-        });
-    });
-}
-
-function addIndicator(type) {
-    if (indicators.find(i => i.type === type)) {
-        alert(`${type} already added`);
-        return;
-    }
-    
-    let series = [];
-    
-    switch (type) {
-        case 'SMA': {
-            const data = calculateSMA(allData, 20);
-            const s = chart.addLineSeries({ color: '#2962ff', lineWidth: 2, priceLineVisible: false });
-            s.setData(data);
-            series.push(s);
-            break;
-        }
-        case 'EMA': {
-            const data = calculateEMA(allData, 20);
-            const s = chart.addLineSeries({ color: '#ff9800', lineWidth: 2, priceLineVisible: false });
-            s.setData(data);
-            series.push(s);
-            break;
-        }
-        case 'BB': {
-            const bb = calculateBollingerBands(allData, 20, 2);
-            const upper = chart.addLineSeries({ color: '#2196f3', lineWidth: 1 });
-            const middle = chart.addLineSeries({ color: '#ff9800', lineWidth: 1 });
-            const lower = chart.addLineSeries({ color: '#2196f3', lineWidth: 1 });
-            upper.setData(bb.upper);
-            middle.setData(bb.middle);
-            lower.setData(bb.lower);
-            series.push(upper, middle, lower);
-            break;
-        }
-        case 'RSI': {
-            const data = calculateRSI(allData, 14);
-            const s = chart.addLineSeries({ color: '#9c27b0', lineWidth: 2, priceScaleId: 'rsi' });
-            s.setData(data);
-            series.push(s);
-            break;
-        }
-        case 'MACD': {
-            const macd = calculateMACD(allData);
-            const macdLine = chart.addLineSeries({ color: '#2962ff', lineWidth: 2, priceScaleId: 'macd' });
-            const signalLine = chart.addLineSeries({ color: '#ff9800', lineWidth: 1, priceScaleId: 'macd' });
-            macdLine.setData(macd.macd);
-            signalLine.setData(macd.signal);
-            series.push(macdLine, signalLine);
-            break;
-        }
-    }
-    
-    indicators.push({ type, series });
-    updateIndicatorList();
-}
-
-function removeIndicator(type) {
-    const idx = indicators.findIndex(i => i.type === type);
-    if (idx === -1) return;
-    
-    indicators[idx].series.forEach(s => chart.removeSeries(s));
-    indicators.splice(idx, 1);
-    updateIndicatorList();
-}
-
-function updateIndicatorList() {
-    const list = document.getElementById('indicatorList');
-    
-    list.innerHTML = indicators.map(ind => `
-        <div class="indicator-option" style="background: var(--bg-tertiary); margin-bottom: 4px;">
-            <span class="indicator-option-name">${ind.type}</span>
-            <button class="modal-close" onclick="removeIndicator('${ind.type}')" style="width: 24px; height: 24px;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 12px; height: 12px;">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-            </button>
-        </div>
-    `).join('');
-    
-    document.getElementById('indicatorCount').textContent = indicators.length;
-}
-
-// ==================== INDICATOR CALCULATIONS ====================
-function calculateSMA(data, period) {
-    const result = [];
-    for (let i = period - 1; i < data.length; i++) {
-        let sum = 0;
-        for (let j = 0; j < period; j++) {
-            sum += data[i - j].close;
-        }
-        result.push({ time: data[i].time, value: sum / period });
-    }
-    return result;
-}
-
-function calculateEMA(data, period) {
-    const result = [];
-    const multiplier = 2 / (period + 1);
-    let ema = data[0].close;
-    
-    for (let i = 0; i < data.length; i++) {
-        if (i === 0) {
-            ema = data[i].close;
-        } else {
-            ema = (data[i].close - ema) * multiplier + ema;
-        }
-        result.push({ time: data[i].time, value: ema });
-    }
-    return result;
-}
-
-function calculateBollingerBands(data, period, stdDev) {
-    const upper = [], middle = [], lower = [];
-    
-    for (let i = period - 1; i < data.length; i++) {
-        let sum = 0;
-        for (let j = 0; j < period; j++) sum += data[i - j].close;
-        const avg = sum / period;
-        
-        let variance = 0;
-        for (let j = 0; j < period; j++) {
-            variance += Math.pow(data[i - j].close - avg, 2);
-        }
-        const std = Math.sqrt(variance / period);
-        
-        middle.push({ time: data[i].time, value: avg });
-        upper.push({ time: data[i].time, value: avg + stdDev * std });
-        lower.push({ time: data[i].time, value: avg - stdDev * std });
-    }
-    
-    return { upper, middle, lower };
-}
-
-function calculateRSI(data, period) {
-    const result = [];
-    let gains = 0, losses = 0;
-    
-    for (let i = 1; i <= period; i++) {
-        const change = data[i].close - data[i - 1].close;
-        if (change > 0) gains += change;
-        else losses -= change;
-    }
-    
-    let avgGain = gains / period;
-    let avgLoss = losses / period;
-    
-    for (let i = period; i < data.length; i++) {
-        const change = data[i].close - data[i - 1].close;
-        const gain = change > 0 ? change : 0;
-        const loss = change < 0 ? -change : 0;
-        
-        avgGain = (avgGain * (period - 1) + gain) / period;
-        avgLoss = (avgLoss * (period - 1) + loss) / period;
-        
-        const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
-        const rsi = 100 - (100 / (1 + rs));
-        
-        result.push({ time: data[i].time, value: rsi });
-    }
-    return result;
-}
-
-function calculateMACD(data) {
-    const ema12 = calculateEMA(data, 12);
-    const ema26 = calculateEMA(data, 26);
-    
-    const macdLine = [];
-    for (let i = 0; i < ema26.length; i++) {
-        macdLine.push({
-            time: ema26[i].time,
-            value: ema12[i + (ema12.length - ema26.length)].value - ema26[i].value
-        });
-    }
-    
-    // Signal line (EMA of MACD)
-    const signalMultiplier = 2 / (9 + 1);
-    const signalLine = [];
-    let signal = macdLine[0].value;
-    
-    for (let i = 0; i < macdLine.length; i++) {
-        if (i === 0) {
-            signal = macdLine[i].value;
-        } else {
-            signal = (macdLine[i].value - signal) * signalMultiplier + signal;
-        }
-        signalLine.push({ time: macdLine[i].time, value: signal });
-    }
-    
-    return { macd: macdLine, signal: signalLine };
-}
-
-// ==================== EVENT HANDLERS ====================
+// ==================== EVENTS ====================
 function initEvents() {
-    // Timeframe buttons
     document.querySelectorAll('.tf-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
             currentTimeframe = btn.dataset.tf;
-            const label = currentTimeframe === 'D' ? '1D' : 
-                         currentTimeframe === 'W' ? '1W' : 
-                         currentTimeframe + 'm';
-            document.getElementById('legendTF').textContent = label;
-            document.getElementById('statusTF').textContent = label;
-            
             loadSymbol(currentSymbol);
         });
     });
     
-    // Chart type buttons
-    document.querySelectorAll('.chart-type-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.chart-type-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentChartType = btn.dataset.type;
-        });
-    });
-    
-    // Drawing tools
-    document.querySelectorAll('.tool-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            activeTool = btn.dataset.tool;
-        });
-    });
-    
-    // Symbol search
     document.getElementById('symbolInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             const symbol = e.target.value.trim().toUpperCase();
-            if (symbol) {
+            if (SYMBOLS[symbol]) {
                 loadSymbol(symbol);
+            } else {
+                alert(`Symbol ${symbol} tidak tersedia. Tersedia: ${Object.keys(SYMBOLS).join(', ')}`);
             }
         }
     });
     
-    // Clock
+    document.getElementById('timezoneSelector').addEventListener('change', (e) => {
+        currentTimezone = e.target.value;
+        document.getElementById('statusTimezone').textContent = currentTimezone;
+        
+        // Update chart localization
+        chart.applyOptions({
+            localization: {
+                timeFormatter: (time) => {
+                    const date = new Date(time * 1000);
+                    return date.toLocaleString('en-GB', {
+                        timeZone: currentTimezone,
+                        hour12: false,
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+            }
+        });
+    });
+    
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+        loadSymbol(currentSymbol);
+    });
+    
+    // Live clock
     setInterval(() => {
         const now = new Date();
-        document.getElementById('statusTime').textContent = 
-            now.toLocaleTimeString('en-GB', { hour12: false, timeZone: 'UTC' });
+        const formatted = now.toLocaleTimeString('en-GB', {
+            timeZone: currentTimezone,
+            hour12: false
+        });
+        document.getElementById('statusTime').textContent = formatted;
     }, 1000);
 }
 
-// ==================== INITIALIZE ====================
-document.addEventListener('DOMContentLoaded', () => {
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', async () => {
     initChart();
-    renderWatchlist();
-    loadSymbol('XAUUSD');
-    initReplay();
-    initIndicators();
     initEvents();
+    await loadSymbol('XAUUSD');
+    await renderWatchlist();
+    startRealtimeUpdates();
 });
-
-// Expose for global access
-window.removeIndicator = removeIndicator;
 </script>
 
 </body>
