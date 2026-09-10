@@ -100,7 +100,6 @@
             pointer-events: none;
         }
         
-        /* Timezone Selector */
         .timezone-selector {
             background: var(--bg-primary);
             border: 1px solid var(--border-color);
@@ -235,7 +234,6 @@
         .price-change.positive { color: var(--success); }
         .price-change.negative { color: var(--danger); }
         
-        /* Connection Status */
         .connection-status {
             position: absolute;
             bottom: 12px;
@@ -318,9 +316,6 @@
         .watchlist-name { font-size: 13px; }
         .watchlist-price { text-align: right; }
         .watchlist-price-value { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
-        .watchlist-price-change { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
-        .watchlist-price-change.up { color: var(--success); }
-        .watchlist-price-change.down { color: var(--danger); }
         
         /* Bottom Bar */
         .bottom-bar {
@@ -365,11 +360,11 @@
         
         <select class="timezone-selector" id="timezoneSelector">
             <option value="UTC">UTC</option>
-            <option value="Asia/Jakarta">WIB (Jakarta)</option>
-            <option value="Asia/Singapore">SGT (Singapore)</option>
-            <option value="America/New_York">EST (New York)</option>
-            <option value="Europe/London">GMT (London)</option>
-            <option value="Asia/Tokyo">JST (Tokyo)</option>
+            <option value="Asia/Jakarta">WIB</option>
+            <option value="Asia/Singapore">SGT</option>
+            <option value="America/New_York">EST</option>
+            <option value="Europe/London">GMT</option>
+            <option value="Asia/Tokyo">JST</option>
         </select>
         
         <div class="timeframe-group">
@@ -449,7 +444,7 @@
     <footer class="bottom-bar">
         <div class="status-item">
             <div class="status-dot"></div>
-            <span id="footerStatus">Connected</span>
+            <span id="footerStatus">Connecting...</span>
         </div>
         <div class="status-item">
             <span>Symbol:</span>
@@ -473,17 +468,20 @@
 
 <script>
 // ==================== SYMBOLS DATABASE ====================
-// Symbol mapping ke Chainlink feed address
 const SYMBOLS = {
-    'XAUUSD': { name: 'Gold', feed: '0x214eD9Da11A4c61eD4D3B4fB0dA8f8a3d63C7E2B', color: '#ffd700' },
-    'XAGUSD': { name: 'Silver', feed: '0x379589227b15F1a12195D3f2d90bBc9F31f95235', color: '#c0c0c0' },
-    'EURUSD': { name: 'EUR/USD', feed: '0xb49f677943BC038e9857d61E7d053CaA2C1734C1', color: '#003399' },
-    'GBPUSD': { name: 'GBP/USD', feed: '0x5c0Ab2d9b5a7ed9f470386e82BB36A3613cDd4b5', color: '#cf142b' },
-    'BTCUSD': { name: 'Bitcoin', feed: '0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c', color: '#f7931a' },
-    'ETHUSD': { name: 'Ethereum', feed: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419', color: '#627eea' }
+    'XAUUSD': { name: 'Gold', color: '#ffd700', category: 'Commodity' },
+    'XAGUSD': { name: 'Silver', color: '#c0c0c0', category: 'Commodity' },
+    'BTCUSD': { name: 'Bitcoin', color: '#f7931a', category: 'Crypto' },
+    'ETHUSD': { name: 'Ethereum', color: '#627eea', category: 'Crypto' },
+    'SOLUSD': { name: 'Solana', color: '#14f195', category: 'Crypto' },
+    'BNBUSD': { name: 'Binance Coin', color: '#f0b90b', category: 'Crypto' },
+    'EURUSD': { name: 'EUR/USD', color: '#003399', category: 'Forex' },
+    'GBPUSD': { name: 'GBP/USD', color: '#cf142b', category: 'Forex' },
+    'USDJPY': { name: 'USD/JPY', color: '#bc002d', category: 'Forex' },
+    'AUDUSD': { name: 'AUD/USD', color: '#00008b', category: 'Forex' }
 };
 
-const WATCHLIST = ['XAUUSD', 'XAGUSD', 'EURUSD', 'GBPUSD', 'BTCUSD', 'ETHUSD'];
+const WATCHLIST = ['XAUUSD', 'XAGUSD', 'BTCUSD', 'ETHUSD', 'EURUSD', 'GBPUSD'];
 
 // ==================== STATE ====================
 let chart, candleSeries;
@@ -493,13 +491,7 @@ let currentTimezone = 'UTC';
 let allData = [];
 let currentPrice = 0;
 let updateInterval = null;
-
-// RPC endpoints (public, gratis)
-const RPC_ENDPOINTS = [
-    'https://ethereum-rpc.publicnode.com',
-    'https://eth.llamarpc.com',
-    'https://rpc.ankr.com/eth'
-];
+let lastUpdatedAt = 0;
 
 // ==================== INIT CHART ====================
 function initChart() {
@@ -576,72 +568,49 @@ function initChart() {
     });
 }
 
-// ==================== FETCH REAL PRICE DARI CHAINLINK ====================
-async function fetchChainlinkPrice(feedAddress) {
-    // Chainlink latestRoundData() function selector: 0xfeaf968c
-    const data = '0xfeaf968c';
-    
-    for (const rpc of RPC_ENDPOINTS) {
-        try {
-            const response = await fetch(rpc, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    jsonrpc: '2.0',
-                    method: 'eth_call',
-                    params: [{
-                        to: feedAddress,
-                        data: data
-                    }, 'latest'],
-                    id: 1
-                })
-            });
-            
-            const json = await response.json();
-            if (json.result) {
-                // Parse response: roundId, answer, startedAt, updatedAt, answeredInRound
-                const hex = json.result.slice(2);
-                const answer = parseInt(hex.slice(64, 128), 16);
-                const updatedAt = parseInt(hex.slice(192, 256), 16);
-                
-                // Chainlink price feeds pake 8 decimals
-                const price = answer / 1e8;
-                
-                return { price, updatedAt };
-            }
-        } catch (e) {
-            console.warn(`RPC ${rpc} failed, trying next...`);
+// ==================== FETCH PRICE VIA SERVERLESS PROXY ====================
+async function fetchPrice(symbol) {
+    try {
+        const response = await fetch(`/api/price?symbol=${symbol}`);
+        const json = await response.json();
+        
+        if (!json.success) {
+            throw new Error(json.error || 'Failed to fetch');
         }
+        
+        return {
+            price: json.price,
+            updatedAt: json.updatedAt
+        };
+    } catch (error) {
+        console.error('Fetch error:', error);
+        throw error;
     }
-    
-    throw new Error('All RPC endpoints failed');
 }
 
-// ==================== GENERATE CANDLE DARI PRICE REAL ====================
-// Karena Chainlink cuma kasih harga terakhir, kita build candle dari history
-// dengan pattern yang realistis berdasarkan harga real
-function buildCandlesFromPrice(currentPrice, count = 500, intervalSeconds = 14400) {
+// ==================== BUILD CANDLES FROM REAL PRICE ====================
+function buildCandlesFromPrice(realPrice, count = 500, intervalSeconds = 14400) {
     const candles = [];
     const now = Math.floor(Date.now() / 1000);
     const startTime = now - (count * intervalSeconds);
     
-    // Seed dari harga real
-    let price = currentPrice * 0.95; // Start 5% lower (typical historical range)
-    const volatility = currentPrice * 0.008;
-    
-    // Seeded random biar konsisten per symbol
-    let seed = currentPrice * 1000;
+    // Seeded random for consistency
+    let seed = Math.floor(realPrice * 100);
     const random = () => {
         seed = (seed * 9301 + 49297) % 233280;
         return seed / 233280;
     };
     
+    // Start from a realistic historical price (slightly below current)
+    let price = realPrice * 0.92;
+    const volatility = realPrice * 0.008;
+    
     for (let i = 0; i < count; i++) {
         const time = startTime + (i * intervalSeconds);
         
-        // Trend naik menuju harga current
+        // Gradual trend toward real price
         const progress = i / count;
-        const targetPrice = currentPrice * (0.95 + (0.05 * progress));
+        const targetPrice = realPrice * (0.92 + (0.08 * progress));
         
         const open = price;
         const range = volatility * (0.5 + random());
@@ -660,11 +629,11 @@ function buildCandlesFromPrice(currentPrice, count = 500, intervalSeconds = 1440
         price = close;
     }
     
-    // Last candle = harga real
+    // Last candle = real price
     const lastCandle = candles[candles.length - 1];
-    lastCandle.close = currentPrice;
-    lastCandle.high = Math.max(lastCandle.high, currentPrice);
-    lastCandle.low = Math.min(lastCandle.low, currentPrice);
+    lastCandle.close = realPrice;
+    lastCandle.high = Math.max(lastCandle.high, realPrice);
+    lastCandle.low = Math.min(lastCandle.low, realPrice);
     
     return candles;
 }
@@ -672,23 +641,22 @@ function buildCandlesFromPrice(currentPrice, count = 500, intervalSeconds = 1440
 // ==================== LOAD SYMBOL ====================
 async function loadSymbol(symbol) {
     currentSymbol = symbol.toUpperCase();
-    const info = SYMBOLS[currentSymbol];
     
-    if (!info) {
-        console.error('Unknown symbol:', symbol);
+    if (!SYMBOLS[currentSymbol]) {
+        alert(`Symbol ${currentSymbol} tidak tersedia.\n\nTersedia: ${Object.keys(SYMBOLS).join(', ')}`);
         return;
     }
     
     setConnectionStatus('Fetching...', 'warning');
     
     try {
-        // Fetch harga real dari Chainlink
-        const { price, updatedAt } = await fetchChainlinkPrice(info.feed);
+        const { price, updatedAt } = await fetchPrice(currentSymbol);
         currentPrice = price;
+        lastUpdatedAt = updatedAt;
         
-        console.log(`✅ ${currentSymbol}: $${price.toFixed(2)} (updated ${new Date(updatedAt * 1000).toISOString()})`);
+        console.log(`✅ ${currentSymbol}: $${price.toFixed(2)}`);
         
-        // Build candles dari harga real
+        // Build candles from real price
         const intervalSec = getIntervalSeconds(currentTimeframe);
         allData = buildCandlesFromPrice(price, 500, intervalSec);
         
@@ -711,32 +679,28 @@ async function loadSymbol(symbol) {
         changeEl.className = 'price-change ' + (change >= 0 ? 'positive' : 'negative');
         
         setConnectionStatus('Connected', 'success');
-        
-        // Update time display
         updateTimeDisplay(updatedAt);
         
     } catch (error) {
         console.error('Failed to load symbol:', error);
         setConnectionStatus('Error - Retrying...', 'error');
-        
-        // Retry after 3 seconds
-        setTimeout(() => loadSymbol(symbol), 3000);
+        setTimeout(() => loadSymbol(symbol), 5000);
     }
 }
 
-// ==================== REALTIME UPDATE ====================
+// ==================== REALTIME UPDATES ====================
 function startRealtimeUpdates() {
     if (updateInterval) clearInterval(updateInterval);
     
     updateInterval = setInterval(async () => {
-        const info = SYMBOLS[currentSymbol];
-        if (!info) return;
+        if (!SYMBOLS[currentSymbol]) return;
         
         try {
-            const { price, updatedAt } = await fetchChainlinkPrice(info.feed);
+            const { price, updatedAt } = await fetchPrice(currentSymbol);
             
             if (price !== currentPrice) {
                 currentPrice = price;
+                lastUpdatedAt = updatedAt;
                 
                 // Update last candle
                 const lastCandle = allData[allData.length - 1];
@@ -758,9 +722,9 @@ function startRealtimeUpdates() {
                 updateTimeDisplay(updatedAt);
             }
         } catch (e) {
-            console.warn('Realtime update failed:', e.message);
+            console.warn('Update failed:', e.message);
         }
-    }, 10000); // Update tiap 10 detik (Chainlink update ~1 jam sekali)
+    }, 15000); // Update tiap 15 detik
 }
 
 // ==================== HELPERS ====================
@@ -816,10 +780,10 @@ async function renderWatchlist() {
         `;
     }).join('');
     
-    // Fetch prices untuk semua watchlist
+    // Fetch prices for all watchlist
     for (const sym of WATCHLIST) {
         try {
-            const { price } = await fetchChainlinkPrice(SYMBOLS[sym].feed);
+            const { price } = await fetchPrice(sym);
             document.getElementById(`wl-${sym}-price`).textContent = `$${price.toFixed(2)}`;
         } catch (e) {
             document.getElementById(`wl-${sym}-price`).textContent = 'N/A';
@@ -848,7 +812,7 @@ function initEvents() {
             if (SYMBOLS[symbol]) {
                 loadSymbol(symbol);
             } else {
-                alert(`Symbol ${symbol} tidak tersedia. Tersedia: ${Object.keys(SYMBOLS).join(', ')}`);
+                alert(`Symbol ${symbol} tidak tersedia.\n\nTersedia: ${Object.keys(SYMBOLS).join(', ')}`);
             }
         }
     });
@@ -857,7 +821,6 @@ function initEvents() {
         currentTimezone = e.target.value;
         document.getElementById('statusTimezone').textContent = currentTimezone;
         
-        // Update chart localization
         chart.applyOptions({
             localization: {
                 timeFormatter: (time) => {
