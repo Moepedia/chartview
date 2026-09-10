@@ -1,74 +1,32 @@
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nebolus Terminal — Professional Trading</title>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <!-- Tailwind CSS v3 (LEBIH STABIL DARI v4) -->
+    <!-- Tailwind v3 (STABIL) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        bg: '#0d1117',
-                        panel: '#161b22',
-                        border: '#30363d',
-                        text: '#c9d1d9',
-                        muted: '#8b949e',
-                        accent: '#00d4ff',
-                        up: '#3fb950',
-                        down: '#f85149',
-                    }
-                }
-            }
-        }
+        tailwind.config = { darkMode: 'class' }
     </script>
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     
-    <!-- Lightweight Charts -->
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <!-- Lightweight Charts v4 (STABIL) -->
+    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
     
     <style>
-        * { box-sizing: border-box; }
-        html, body { 
-            height: 100%; 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden;
-            background: #0d1117;
-            color: #c9d1d9;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; overflow: hidden; background: #0d1117; color: #c9d1d9; font-family: 'Inter', sans-serif; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
-        
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #484f58; }
-        
         #chart-container { position: relative; width: 100%; height: 100%; }
-        
-        .tooltip {
-            position: absolute;
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 8px 12px;
-            font-size: 11px;
-            font-family: 'JetBrains Mono', monospace;
-            pointer-events: none;
-            z-index: 100;
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -86,20 +44,13 @@
         
         <div class="w-px h-6 bg-[#30363d]"></div>
         
-        <!-- Symbol Search with Dropdown -->
         <div class="relative">
             <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8b949e] z-10"></i>
-            <input 
-                type="text" 
-                id="symbolSearch"
-                placeholder="Search symbol..."
-                autocomplete="off"
-                class="w-64 bg-[#0d1117] border border-[#30363d] rounded-md pl-9 pr-3 py-1.5 text-sm text-[#f0f6fc] placeholder-[#8b949e] focus:outline-none focus:border-[#00d4ff]"
-            >
+            <input type="text" id="symbolSearch" placeholder="Search symbol..." autocomplete="off"
+                class="w-64 bg-[#0d1117] border border-[#30363d] rounded-md pl-9 pr-3 py-1.5 text-sm text-[#f0f6fc] placeholder-[#8b949e] focus:outline-none focus:border-[#00d4ff]">
             <div id="searchDropdown" class="hidden absolute top-full left-0 right-0 mt-1 bg-[#161b22] border border-[#30363d] rounded-md shadow-xl z-50 max-h-80 overflow-y-auto"></div>
         </div>
         
-        <!-- Timeframe -->
         <div class="flex items-center gap-0.5 bg-[#0d1117] rounded-md p-1 border border-[#30363d]">
             <button class="tf-btn px-3 py-1 text-xs font-medium rounded text-[#8b949e] hover:text-[#f0f6fc] hover:bg-[#21262d]" data-tf="1">1m</button>
             <button class="tf-btn px-3 py-1 text-xs font-medium rounded text-[#8b949e] hover:text-[#f0f6fc] hover:bg-[#21262d]" data-tf="5">5m</button>
@@ -110,65 +61,40 @@
             <button class="tf-btn px-3 py-1 text-xs font-medium rounded text-[#8b949e] hover:text-[#f0f6fc] hover:bg-[#21262d]" data-tf="W">1W</button>
         </div>
         
-        <!-- Chart Type -->
         <div class="flex items-center gap-0.5 bg-[#0d1117] rounded-md p-1 border border-[#30363d]">
-            <button class="chart-type-btn p-1.5 rounded bg-[#21262d] text-[#00d4ff]" data-type="candlestick" title="Candlestick">
+            <button class="chart-type-btn p-1.5 rounded bg-[#21262d] text-[#00d4ff]" data-type="candlestick">
                 <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
             </button>
-            <button class="chart-type-btn p-1.5 rounded text-[#8b949e] hover:text-[#f0f6fc]" data-type="line" title="Line">
+            <button class="chart-type-btn p-1.5 rounded text-[#8b949e] hover:text-[#f0f6fc]" data-type="line">
                 <i data-lucide="line-chart" class="w-4 h-4"></i>
             </button>
-            <button class="chart-type-btn p-1.5 rounded text-[#8b949e] hover:text-[#f0f6fc]" data-type="area" title="Area">
+            <button class="chart-type-btn p-1.5 rounded text-[#8b949e] hover:text-[#f0f6fc]" data-type="area">
                 <i data-lucide="area-chart" class="w-4 h-4"></i>
             </button>
         </div>
         
         <div class="flex-1"></div>
         
-        <button class="p-2 rounded-md hover:bg-[#21262d]" title="Compare">
-            <i data-lucide="git-compare" class="w-4 h-4 text-[#8b949e]"></i>
-        </button>
-        <button class="p-2 rounded-md hover:bg-[#21262d]" title="Alerts">
-            <i data-lucide="bell" class="w-4 h-4 text-[#8b949e]"></i>
-        </button>
-        <button class="p-2 rounded-md hover:bg-[#21262d]" title="Settings">
-            <i data-lucide="settings" class="w-4 h-4 text-[#8b949e]"></i>
-        </button>
+        <button class="p-2 rounded-md hover:bg-[#21262d]"><i data-lucide="git-compare" class="w-4 h-4 text-[#8b949e]"></i></button>
+        <button class="p-2 rounded-md hover:bg-[#21262d]"><i data-lucide="bell" class="w-4 h-4 text-[#8b949e]"></i></button>
+        <button class="p-2 rounded-md hover:bg-[#21262d]"><i data-lucide="settings" class="w-4 h-4 text-[#8b949e]"></i></button>
     </header>
     
     <!-- MAIN -->
     <div class="grid overflow-hidden" style="grid-template-columns: 48px 1fr 300px;">
         
-        <!-- LEFT TOOLBAR -->
         <aside class="bg-[#161b22] border-r border-[#30363d] flex flex-col items-center py-2 gap-1">
-            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md bg-[#00d4ff]/20 text-[#00d4ff]" data-tool="cursor" title="Cursor">
-                <i data-lucide="mouse-pointer-2" class="w-4 h-4"></i>
-            </button>
-            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d] hover:text-[#f0f6fc]" data-tool="trendline" title="Trend Line">
-                <i data-lucide="trending-up" class="w-4 h-4"></i>
-            </button>
-            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d] hover:text-[#f0f6fc]" data-tool="horizontal" title="Horizontal Line">
-                <i data-lucide="minus" class="w-4 h-4"></i>
-            </button>
-            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d] hover:text-[#f0f6fc]" data-tool="fibonacci" title="Fibonacci">
-                <i data-lucide="git-branch" class="w-4 h-4"></i>
-            </button>
-            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d] hover:text-[#f0f6fc]" data-tool="rectangle" title="Rectangle">
-                <i data-lucide="square" class="w-4 h-4"></i>
-            </button>
-            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d] hover:text-[#f0f6fc]" data-tool="text" title="Text">
-                <i data-lucide="type" class="w-4 h-4"></i>
-            </button>
+            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md bg-[#00d4ff]/20 text-[#00d4ff]" data-tool="cursor"><i data-lucide="mouse-pointer-2" class="w-4 h-4"></i></button>
+            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]" data-tool="trendline"><i data-lucide="trending-up" class="w-4 h-4"></i></button>
+            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]" data-tool="horizontal"><i data-lucide="minus" class="w-4 h-4"></i></button>
+            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]" data-tool="fibonacci"><i data-lucide="git-branch" class="w-4 h-4"></i></button>
+            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]" data-tool="rectangle"><i data-lucide="square" class="w-4 h-4"></i></button>
+            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]" data-tool="text"><i data-lucide="type" class="w-4 h-4"></i></button>
             <div class="w-6 h-px bg-[#30363d] my-2"></div>
-            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d] hover:text-[#f0f6fc]" data-tool="measure" title="Measure">
-                <i data-lucide="ruler" class="w-4 h-4"></i>
-            </button>
-            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d] hover:text-[#f0f6fc]" data-tool="zoom" title="Zoom">
-                <i data-lucide="zoom-in" class="w-4 h-4"></i>
-            </button>
+            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]" data-tool="measure"><i data-lucide="ruler" class="w-4 h-4"></i></button>
+            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]" data-tool="zoom"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
         </aside>
         
-        <!-- CHART -->
         <main class="relative bg-[#0d1117]">
             <div id="chart-container"></div>
             
@@ -193,10 +119,7 @@
             </div>
         </main>
         
-        <!-- RIGHT PANEL -->
         <aside class="bg-[#161b22] border-l border-[#30363d] overflow-y-auto">
-            
-            <!-- INDICATORS -->
             <div class="border-b border-[#30363d]">
                 <div class="flex items-center justify-between px-3 py-2">
                     <span class="text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Indicators</span>
@@ -205,13 +128,11 @@
                 <div class="px-2 pb-2 space-y-1" id="indicatorList"></div>
                 <div class="px-2 pb-2">
                     <button id="addIndicatorBtn" class="w-full flex items-center justify-center gap-2 py-2 rounded-md border border-dashed border-[#30363d] text-[#8b949e] hover:border-[#00d4ff] hover:text-[#00d4ff] text-xs">
-                        <i data-lucide="plus" class="w-3 h-3"></i>
-                        Add Indicator
+                        <i data-lucide="plus" class="w-3 h-3"></i> Add Indicator
                     </button>
                 </div>
             </div>
             
-            <!-- REPLAY -->
             <div class="border-b border-[#30363d]">
                 <div class="flex items-center justify-between px-3 py-2">
                     <span class="text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Bar Replay</span>
@@ -219,24 +140,15 @@
                 </div>
                 <div class="px-2 pb-2 space-y-2">
                     <div class="grid grid-cols-4 gap-1">
-                        <button id="replayStart" class="flex items-center justify-center py-2 rounded-md bg-[#21262d] hover:bg-[#30363d]" title="Play">
-                            <i data-lucide="play" class="w-4 h-4 text-[#3fb950]"></i>
-                        </button>
-                        <button id="replayPause" class="flex items-center justify-center py-2 rounded-md bg-[#21262d] hover:bg-[#30363d]" title="Pause">
-                            <i data-lucide="pause" class="w-4 h-4 text-[#d29922]"></i>
-                        </button>
-                        <button id="replayStep" class="flex items-center justify-center py-2 rounded-md bg-[#21262d] hover:bg-[#30363d]" title="Step">
-                            <i data-lucide="skip-forward" class="w-4 h-4 text-[#8b949e]"></i>
-                        </button>
-                        <button id="replayReset" class="flex items-center justify-center py-2 rounded-md bg-[#21262d] hover:bg-[#30363d]" title="Reset">
-                            <i data-lucide="rotate-ccw" class="w-4 h-4 text-[#8b949e]"></i>
-                        </button>
+                        <button id="replayStart" class="flex items-center justify-center py-2 rounded-md bg-[#21262d] hover:bg-[#30363d]"><i data-lucide="play" class="w-4 h-4 text-[#3fb950]"></i></button>
+                        <button id="replayPause" class="flex items-center justify-center py-2 rounded-md bg-[#21262d] hover:bg-[#30363d]"><i data-lucide="pause" class="w-4 h-4 text-[#d29922]"></i></button>
+                        <button id="replayStep" class="flex items-center justify-center py-2 rounded-md bg-[#21262d] hover:bg-[#30363d]"><i data-lucide="skip-forward" class="w-4 h-4 text-[#8b949e]"></i></button>
+                        <button id="replayReset" class="flex items-center justify-center py-2 rounded-md bg-[#21262d] hover:bg-[#30363d]"><i data-lucide="rotate-ccw" class="w-4 h-4 text-[#8b949e]"></i></button>
                     </div>
-                    <select id="replaySpeed" class="w-full bg-[#0d1117] border border-[#30363d] rounded-md px-2 py-1.5 text-xs text-[#c9d1d9] focus:outline-none focus:border-[#00d4ff]">
+                    <select id="replaySpeed" class="w-full bg-[#0d1117] border border-[#30363d] rounded-md px-2 py-1.5 text-xs text-[#c9d1d9]">
                         <option value="1">1x Speed</option>
                         <option value="5">5x Speed</option>
                         <option value="10">10x Speed</option>
-                        <option value="50">50x Speed</option>
                     </select>
                     <div class="w-full h-1 bg-[#21262d] rounded-full overflow-hidden">
                         <div class="h-full bg-[#00d4ff] transition-all" id="replayProgress" style="width: 0%;"></div>
@@ -244,7 +156,6 @@
                 </div>
             </div>
             
-            <!-- WATCHLIST -->
             <div class="border-b border-[#30363d]">
                 <div class="flex items-center justify-between px-3 py-2">
                     <span class="text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Watchlist</span>
@@ -253,35 +164,21 @@
                 <div class="px-2 pb-2 space-y-0.5" id="watchlistContainer"></div>
             </div>
             
-            <!-- MARKET INFO -->
             <div class="p-3">
                 <div class="flex items-center gap-2 text-xs mb-3">
                     <div class="w-2 h-2 rounded-full bg-[#3fb950]"></div>
                     <span class="text-[#8b949e]">Market Open</span>
                 </div>
                 <div class="space-y-1 text-xs">
-                    <div class="flex justify-between py-1">
-                        <span class="text-[#8b949e]">24h Volume</span>
-                        <span class="font-mono text-[#c9d1d9]" id="infoVolume">-</span>
-                    </div>
-                    <div class="flex justify-between py-1">
-                        <span class="text-[#8b949e]">24h High</span>
-                        <span class="font-mono text-[#3fb950]" id="infoHigh">-</span>
-                    </div>
-                    <div class="flex justify-between py-1">
-                        <span class="text-[#8b949e]">24h Low</span>
-                        <span class="font-mono text-[#f85149]" id="infoLow">-</span>
-                    </div>
-                    <div class="flex justify-between py-1">
-                        <span class="text-[#8b949e]">24h Change</span>
-                        <span class="font-mono" id="infoChange">-</span>
-                    </div>
+                    <div class="flex justify-between py-1"><span class="text-[#8b949e]">24h Volume</span><span class="font-mono text-[#c9d1d9]" id="infoVolume">-</span></div>
+                    <div class="flex justify-between py-1"><span class="text-[#8b949e]">24h High</span><span class="font-mono text-[#3fb950]" id="infoHigh">-</span></div>
+                    <div class="flex justify-between py-1"><span class="text-[#8b949e]">24h Low</span><span class="font-mono text-[#f85149]" id="infoLow">-</span></div>
+                    <div class="flex justify-between py-1"><span class="text-[#8b949e]">24h Change</span><span class="font-mono" id="infoChange">-</span></div>
                 </div>
             </div>
         </aside>
     </div>
     
-    <!-- STATUS BAR -->
     <footer class="bg-[#161b22] border-t border-[#30363d] flex items-center px-4 gap-3 text-xs">
         <div class="flex items-center gap-2">
             <div class="w-1.5 h-1.5 rounded-full bg-[#3fb950]"></div>
@@ -298,42 +195,6 @@
     </footer>
 </div>
 
-<!-- Indicator Modal -->
-<div id="indicatorModal" class="hidden fixed inset-0 bg-black/60 z-50 items-center justify-center" style="display: none;">
-    <div class="bg-[#161b22] border border-[#30363d] rounded-lg w-96 max-h-[80vh] overflow-y-auto">
-        <div class="flex items-center justify-between p-4 border-b border-[#30363d]">
-            <h3 class="text-sm font-semibold text-[#f0f6fc]">Add Indicator</h3>
-            <button id="closeIndicatorModal" class="text-[#8b949e] hover:text-[#f0f6fc]">
-                <i data-lucide="x" class="w-4 h-4"></i>
-            </button>
-        </div>
-        <div class="p-4 space-y-1">
-            <div class="text-xs text-[#8b949e] uppercase mb-2">Trend</div>
-            <div class="indicator-option flex justify-between p-2 rounded hover:bg-[#21262d] cursor-pointer" data-indicator="SMA">
-                <span class="text-sm">Simple Moving Average</span>
-                <span class="text-xs text-[#8b949e] font-mono">SMA(20)</span>
-            </div>
-            <div class="indicator-option flex justify-between p-2 rounded hover:bg-[#21262d] cursor-pointer" data-indicator="EMA">
-                <span class="text-sm">Exponential MA</span>
-                <span class="text-xs text-[#8b949e] font-mono">EMA(20)</span>
-            </div>
-            <div class="indicator-option flex justify-between p-2 rounded hover:bg-[#21262d] cursor-pointer" data-indicator="BB">
-                <span class="text-sm">Bollinger Bands</span>
-                <span class="text-xs text-[#8b949e] font-mono">BB(20,2)</span>
-            </div>
-            <div class="text-xs text-[#8b949e] uppercase mb-2 mt-3">Momentum</div>
-            <div class="indicator-option flex justify-between p-2 rounded hover:bg-[#21262d] cursor-pointer" data-indicator="RSI">
-                <span class="text-sm">RSI</span>
-                <span class="text-xs text-[#8b949e] font-mono">RSI(14)</span>
-            </div>
-            <div class="indicator-option flex justify-between p-2 rounded hover:bg-[#21262d] cursor-pointer" data-indicator="MACD">
-                <span class="text-sm">MACD</span>
-                <span class="text-xs text-[#8b949e] font-mono">12,26,9</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="/src/main.js" type="module"></script>
+<script src="./main.js"></script>
 </body>
 </html>
