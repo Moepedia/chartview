@@ -3,14 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nebolus Terminal</title>
+    <title>Nebolus Terminal v2.0</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-    
-    <!-- Lightweight Charts v4 - STABIL -->
     <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
     
     <style>
@@ -20,6 +17,11 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
         #chart { width: 100%; height: 100%; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: #161b22; border: 1px solid #30363d; border-radius: 10px; width: 480px; max-height: 80vh; overflow-y: auto; }
+        .indicator-option { display: flex; justify-content: space-between; padding: 10px; border-radius: 6px; cursor: pointer; }
+        .indicator-option:hover { background: #21262d; }
     </style>
 </head>
 <body>
@@ -56,21 +58,23 @@
         
         <div class="flex-1"></div>
         
-        <button class="p-2 rounded-md hover:bg-[#21262d]"><i data-lucide="git-compare" class="w-4 h-4 text-[#8b949e]"></i></button>
-        <button class="p-2 rounded-md hover:bg-[#21262d]"><i data-lucide="bell" class="w-4 h-4 text-[#8b949e]"></i></button>
-        <button class="p-2 rounded-md hover:bg-[#21262d]"><i data-lucide="settings" class="w-4 h-4 text-[#8b949e]"></i></button>
+        <div class="flex items-center gap-2 text-xs">
+            <div class="flex items-center gap-1.5">
+                <div class="w-1.5 h-1.5 rounded-full bg-[#3fb950]" id="liveDot"></div>
+                <span class="text-[#8b949e]">LIVE</span>
+            </div>
+        </div>
     </header>
     
     <!-- MAIN -->
-    <div style="display: grid; grid-template-columns: 48px 1fr 300px; overflow: hidden;">
+    <div style="display: grid; grid-template-columns: 48px 1fr 320px; overflow: hidden;">
         
         <aside class="bg-[#161b22] border-r border-[#30363d] flex flex-col items-center py-2 gap-1">
-            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md bg-[#00d4ff]/20 text-[#00d4ff]" data-tool="cursor"><i data-lucide="mouse-pointer-2" class="w-4 h-4"></i></button>
-            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]" data-tool="trendline"><i data-lucide="trending-up" class="w-4 h-4"></i></button>
-            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]" data-tool="horizontal"><i data-lucide="minus" class="w-4 h-4"></i></button>
-            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]" data-tool="fibonacci"><i data-lucide="git-branch" class="w-4 h-4"></i></button>
-            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]" data-tool="rectangle"><i data-lucide="square" class="w-4 h-4"></i></button>
-            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]" data-tool="text"><i data-lucide="type" class="w-4 h-4"></i></button>
+            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md bg-[#00d4ff]/20 text-[#00d4ff]"><i data-lucide="mouse-pointer-2" class="w-4 h-4"></i></button>
+            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]"><i data-lucide="trending-up" class="w-4 h-4"></i></button>
+            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]"><i data-lucide="minus" class="w-4 h-4"></i></button>
+            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]"><i data-lucide="git-branch" class="w-4 h-4"></i></button>
+            <button class="tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]"><i data-lucide="square" class="w-4 h-4"></i></button>
         </aside>
         
         <main class="relative bg-[#0d1117]">
@@ -95,9 +99,10 @@
                 <div class="text-lg font-mono font-semibold" id="currentPrice">-</div>
                 <div class="text-xs font-mono" id="priceChange">-</div>
             </div>
-        </main>
+        </aside>
         
         <aside class="bg-[#161b22] border-l border-[#30363d] overflow-y-auto">
+            <!-- INDICATORS -->
             <div class="border-b border-[#30363d]">
                 <div class="flex items-center justify-between px-3 py-2">
                     <span class="text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Indicators</span>
@@ -111,28 +116,40 @@
                 </div>
             </div>
             
+            <!-- BAR REPLAY -->
             <div class="border-b border-[#30363d]">
                 <div class="flex items-center justify-between px-3 py-2">
                     <span class="text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Bar Replay</span>
+                    <i data-lucide="history" class="w-3 h-3 text-[#8b949e]"></i>
                 </div>
                 <div class="px-2 pb-2 space-y-2">
+                    <div class="grid grid-cols-2 gap-1">
+                        <input type="date" id="replayDate" class="bg-[#0d1117] border border-[#30363d] rounded-md px-2 py-1.5 text-xs text-[#c9d1d9] focus:outline-none focus:border-[#00d4ff]">
+                        <input type="time" id="replayTime" value="09:30" class="bg-[#0d1117] border border-[#30363d] rounded-md px-2 py-1.5 text-xs text-[#c9d1d9] focus:outline-none focus:border-[#00d4ff]">
+                    </div>
+                    <button id="replayGoTo" class="w-full py-1.5 rounded-md bg-[#00d4ff]/20 text-[#00d4ff] text-xs hover:bg-[#00d4ff]/30">Go To Date/Time</button>
+                    
                     <div class="grid grid-cols-4 gap-1">
                         <button id="replayStart" class="flex items-center justify-center py-2 rounded-md bg-[#21262d] hover:bg-[#30363d]"><i data-lucide="play" class="w-4 h-4 text-[#3fb950]"></i></button>
                         <button id="replayPause" class="flex items-center justify-center py-2 rounded-md bg-[#21262d] hover:bg-[#30363d]"><i data-lucide="pause" class="w-4 h-4 text-[#d29922]"></i></button>
                         <button id="replayStep" class="flex items-center justify-center py-2 rounded-md bg-[#21262d] hover:bg-[#30363d]"><i data-lucide="skip-forward" class="w-4 h-4 text-[#8b949e]"></i></button>
                         <button id="replayReset" class="flex items-center justify-center py-2 rounded-md bg-[#21262d] hover:bg-[#30363d]"><i data-lucide="rotate-ccw" class="w-4 h-4 text-[#8b949e]"></i></button>
                     </div>
-                    <select id="replaySpeed" class="w-full bg-[#0d1117] border border-[#30363d] rounded-md px-2 py-1.5 text-xs text-[#c9d1d9]">
-                        <option value="1">1x Speed</option>
-                        <option value="5">5x Speed</option>
-                        <option value="10">10x Speed</option>
-                    </select>
+                    
+                    <div class="flex items-center gap-2">
+                        <button id="replaySpeedDown" class="w-6 h-6 rounded bg-[#21262d] text-[#8b949e] text-xs">-</button>
+                        <span class="flex-1 text-center text-xs text-[#c9d1d9] font-mono" id="replaySpeedLabel">1x</span>
+                        <button id="replaySpeedUp" class="w-6 h-6 rounded bg-[#21262d] text-[#8b949e] text-xs">+</button>
+                    </div>
+                    
                     <div class="w-full h-1 bg-[#21262d] rounded-full overflow-hidden">
                         <div class="h-full bg-[#00d4ff] transition-all" id="replayProgress" style="width: 0%;"></div>
                     </div>
+                    <div class="text-xs text-[#8b949e] text-center font-mono" id="replayInfo">- / -</div>
                 </div>
             </div>
             
+            <!-- WATCHLIST -->
             <div class="border-b border-[#30363d]">
                 <div class="flex items-center justify-between px-3 py-2">
                     <span class="text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Watchlist</span>
@@ -152,9 +169,32 @@
         <span class="text-[#8b949e]">Symbol: <span class="text-[#c9d1d9] font-mono" id="statusSymbol">BTCUSD</span></span>
         <div class="w-px h-3 bg-[#30363d]"></div>
         <span class="text-[#8b949e]">TF: <span class="text-[#c9d1d9] font-mono" id="statusTimeframe">4H</span></span>
+        <div class="w-px h-3 bg-[#30363d]"></div>
+        <span class="text-[#8b949e]">Bars: <span class="text-[#c9d1d9] font-mono" id="statusBars">0</span></span>
         <div class="flex-1"></div>
         <span class="text-[#8b949e]">UTC: <span class="text-[#c9d1d9] font-mono" id="statusTime">--:--:--</span></span>
     </footer>
+</div>
+
+<!-- INDICATOR MODAL -->
+<div id="indicatorModal" class="modal">
+    <div class="modal-content">
+        <div class="flex items-center justify-between p-4 border-b border-[#30363d]">
+            <h3 class="text-sm font-semibold text-[#f0f6fc]">Add Indicator</h3>
+            <button id="closeIndicatorModal" class="text-[#8b949e] hover:text-[#f0f6fc]"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="p-4 space-y-1">
+            <div class="text-xs text-[#8b949e] uppercase mb-2">Trend</div>
+            <div class="indicator-option" data-indicator="SMA"><span class="text-sm text-[#f0f6fc]">Simple Moving Average</span><span class="text-xs text-[#8b949e] font-mono">SMA(20)</span></div>
+            <div class="indicator-option" data-indicator="EMA"><span class="text-sm text-[#f0f6fc]">Exponential Moving Average</span><span class="text-xs text-[#8b949e] font-mono">EMA(20)</span></div>
+            <div class="indicator-option" data-indicator="BB"><span class="text-sm text-[#f0f6fc]">Bollinger Bands</span><span class="text-xs text-[#8b949e] font-mono">BB(20,2)</span></div>
+            <div class="text-xs text-[#8b949e] uppercase mb-2 mt-4">Momentum</div>
+            <div class="indicator-option" data-indicator="RSI"><span class="text-sm text-[#f0f6fc]">Relative Strength Index</span><span class="text-xs text-[#8b949e] font-mono">RSI(14)</span></div>
+            <div class="indicator-option" data-indicator="MACD"><span class="text-sm text-[#f0f6fc]">MACD</span><span class="text-xs text-[#8b949e] font-mono">12,26,9</span></div>
+            <div class="text-xs text-[#8b949e] uppercase mb-2 mt-4">Volume</div>
+            <div class="indicator-option" data-indicator="VOLUME"><span class="text-sm text-[#f0f6fc]">Volume</span><span class="text-xs text-[#8b949e] font-mono">—</span></div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -196,18 +236,21 @@ var SYMBOLS = {
 };
 
 var WATCHLIST = ['BTCUSD', 'ETHUSD', 'SOLUSD', 'AAPL', 'TSLA', 'NVDA', 'EURUSD', 'XAUUSD'];
-
 var currentSymbol = 'BTCUSD';
 var currentTimeframe = '240';
 var chart, candleSeries, volumeSeries;
 var allData = [];
+var fullHistory = [];  // Full dataset buat replay
 var replayIndex = 0;
 var replayTimer = null;
+var replaySpeed = 1;
 var indicatorList = [];
+var liveUpdateTimer = null;
+var currentPrice = 0;
 
-// ==================== GENERATE DATA ====================
+// ==================== GENERATE DATA (5000 BARS!) ====================
 function generateData(symbol, timeframe, count) {
-    count = count || 500;
+    count = count || 5000;  // ← 5000 bars, bukan 500 lagi
     var data = [];
     var info = SYMBOLS[symbol] || { basePrice: 100 };
     var basePrice = info.basePrice;
@@ -234,6 +277,7 @@ function generateData(symbol, timeframe, count) {
         data.push({ time: time, open: open, high: high, low: low, close: close, volume: volume });
         basePrice = close;
     }
+    currentPrice = data[data.length - 1].close;
     return data;
 }
 
@@ -242,13 +286,103 @@ function getInterval(tf) {
     return map[tf] || 14400;
 }
 
+// ==================== INDICATOR CALCULATIONS ====================
+function calcSMA(data, period) {
+    var result = [];
+    for (var i = period - 1; i < data.length; i++) {
+        var sum = 0;
+        for (var j = 0; j < period; j++) sum += data[i - j].close;
+        result.push({ time: data[i].time, value: sum / period });
+    }
+    return result;
+}
+
+function calcEMA(data, period) {
+    var result = [];
+    var mult = 2 / (period + 1);
+    var ema = data[0].close;
+    result.push({ time: data[0].time, value: ema });
+    for (var i = 1; i < data.length; i++) {
+        ema = (data[i].close - ema) * mult + ema;
+        result.push({ time: data[i].time, value: ema });
+    }
+    return result;
+}
+
+function calcBB(data, period, mult) {
+    var upper = [], middle = [], lower = [];
+    for (var i = period - 1; i < data.length; i++) {
+        var sum = 0;
+        for (var j = 0; j < period; j++) sum += data[i - j].close;
+        var avg = sum / period;
+        var variance = 0;
+        for (var j = 0; j < period; j++) variance += Math.pow(data[i - j].close - avg, 2);
+        var std = Math.sqrt(variance / period);
+        middle.push({ time: data[i].time, value: avg });
+        upper.push({ time: data[i].time, value: avg + mult * std });
+        lower.push({ time: data[i].time, value: avg - mult * std });
+    }
+    return { upper: upper, middle: middle, lower: lower };
+}
+
+function calcRSI(data, period) {
+    var result = [];
+    var gains = 0, losses = 0;
+    for (var i = 1; i <= period; i++) {
+        var change = data[i].close - data[i - 1].close;
+        if (change > 0) gains += change;
+        else losses -= change;
+    }
+    var avgGain = gains / period;
+    var avgLoss = losses / period;
+    for (var i = period; i < data.length; i++) {
+        var change = data[i].close - data[i - 1].close;
+        var gain = change > 0 ? change : 0;
+        var loss = change < 0 ? -change : 0;
+        avgGain = (avgGain * (period - 1) + gain) / period;
+        avgLoss = (avgLoss * (period - 1) + loss) / period;
+        var rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+        var rsi = 100 - (100 / (1 + rs));
+        result.push({ time: data[i].time, value: rsi });
+    }
+    return result;
+}
+
+function calcMACD(data, fast, slow, signal) {
+    var emaFast = calcEMA(data, fast);
+    var emaSlow = calcEMA(data, slow);
+    var macdLine = [];
+    var offset = emaFast.length - emaSlow.length;
+    for (var i = 0; i < emaSlow.length; i++) {
+        macdLine.push({
+            time: emaSlow[i].time,
+            value: emaFast[i + offset].value - emaSlow[i].value
+        });
+    }
+    var signalLine = [];
+    var mult = 2 / (signal + 1);
+    var ema = macdLine[0].value;
+    signalLine.push({ time: macdLine[0].time, value: ema });
+    for (var i = 1; i < macdLine.length; i++) {
+        ema = (macdLine[i].value - ema) * mult + ema;
+        signalLine.push({ time: macdLine[i].time, value: ema });
+    }
+    var histogram = [];
+    for (var i = 0; i < macdLine.length; i++) {
+        var histValue = macdLine[i].value - signalLine[i].value;
+        histogram.push({
+            time: macdLine[i].time,
+            value: histValue,
+            color: histValue >= 0 ? '#3fb950' : '#f85149'
+        });
+    }
+    return { macd: macdLine, signal: signalLine, histogram: histogram };
+}
+
 // ==================== INIT CHART ====================
 function initChart() {
     var container = document.getElementById('chart');
-    if (!container) { console.error('Chart container not found'); return; }
-    
-    console.log('Initializing chart...');
-    console.log('Container size:', container.clientWidth, 'x', container.clientHeight);
+    if (!container) return;
     
     chart = LightweightCharts.createChart(container, {
         width: container.clientWidth,
@@ -315,8 +449,64 @@ function initChart() {
             height: container.clientHeight
         });
     });
+}
+
+// ==================== LIVE REALTIME UPDATES ====================
+function startLiveUpdates() {
+    if (liveUpdateTimer) clearInterval(liveUpdateTimer);
     
-    console.log('Chart initialized successfully');
+    liveUpdateTimer = setInterval(function() {
+        if (allData.length === 0) return;
+        
+        var lastBar = allData[allData.length - 1];
+        var interval = getInterval(currentTimeframe);
+        var now = Math.floor(Date.now() / 1000);
+        
+        // Update last bar (in-progress candle)
+        if (now - lastBar.time < interval) {
+            var change = (Math.random() - 0.5) * lastBar.close * 0.002;
+            lastBar.close += change;
+            lastBar.high = Math.max(lastBar.high, lastBar.close);
+            lastBar.low = Math.min(lastBar.low, lastBar.close);
+            lastBar.volume += Math.floor(Math.random() * 10000);
+        } else {
+            // New bar
+            var newBar = {
+                time: now - (now % interval),
+                open: lastBar.close,
+                high: lastBar.close + Math.random() * lastBar.close * 0.005,
+                low: lastBar.close - Math.random() * lastBar.close * 0.005,
+                close: lastBar.close + (Math.random() - 0.5) * lastBar.close * 0.01,
+                volume: Math.floor(Math.random() * 1000000)
+            };
+            allData.push(newBar);
+            fullHistory.push(newBar);
+            lastBar = newBar;
+        }
+        
+        candleSeries.update(lastBar);
+        volumeSeries.update({
+            time: lastBar.time,
+            value: lastBar.volume,
+            color: lastBar.close >= lastBar.open ? 'rgba(63,185,80,0.3)' : 'rgba(248,81,73,0.3)'
+        });
+        
+        currentPrice = lastBar.close;
+        updatePriceUI();
+    }, 1000);
+}
+
+function updatePriceUI() {
+    var lastBar = allData[allData.length - 1];
+    var firstBar = allData[0];
+    var change = ((lastBar.close - firstBar.open) / firstBar.open) * 100;
+    
+    document.getElementById('currentPrice').textContent = lastBar.close.toFixed(2);
+    var changeEl = document.getElementById('priceChange');
+    changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
+    changeEl.style.color = change >= 0 ? '#3fb950' : '#f85149';
+    document.getElementById('legendClose').textContent = lastBar.close.toFixed(2);
+    document.getElementById('statusBars').textContent = allData.length;
 }
 
 // ==================== LOAD SYMBOL ====================
@@ -326,12 +516,11 @@ function loadSymbol(symbol) {
         SYMBOLS[symbol] = { name: symbol, basePrice: 100, color: '#00d4ff' };
     }
     
-    console.log('Loading symbol:', symbol);
     currentSymbol = symbol;
-    allData = generateData(symbol, currentTimeframe);
-    console.log('Generated', allData.length, 'bars');
+    allData = generateData(symbol, currentTimeframe, 5000);  // 5000 bars!
+    fullHistory = allData.slice();  // Backup full history
     
-    if (!candleSeries) { console.error('candleSeries not initialized'); return; }
+    if (!candleSeries) return;
     
     candleSeries.setData(allData);
     
@@ -346,24 +535,102 @@ function loadSymbol(symbol) {
     
     chart.timeScale().fitContent();
     
-    var lastBar = allData[allData.length - 1];
-    var firstBar = allData[0];
-    var change = ((lastBar.close - firstBar.open) / firstBar.open) * 100;
-    
     document.getElementById('legendSymbol').textContent = symbol;
     document.getElementById('statusSymbol').textContent = symbol;
     document.getElementById('symbolSearch').value = symbol;
-    document.getElementById('legendOpen').textContent = lastBar.open.toFixed(2);
-    document.getElementById('legendHigh').textContent = lastBar.high.toFixed(2);
-    document.getElementById('legendLow').textContent = lastBar.low.toFixed(2);
-    document.getElementById('legendClose').textContent = lastBar.close.toFixed(2);
+    document.getElementById('statusBars').textContent = allData.length;
     
-    document.getElementById('currentPrice').textContent = lastBar.close.toFixed(2);
-    var changeEl = document.getElementById('priceChange');
-    changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
-    changeEl.style.color = change >= 0 ? '#3fb950' : '#f85149';
+    updatePriceUI();
+    refreshIndicators();
+}
+
+// ==================== INDICATORS ====================
+function addIndicator(type) {
+    if (!chart) return;
     
-    console.log('Symbol loaded successfully:', symbol);
+    // Cek duplikat
+    if (indicatorList.some(function(i) { return i.type === type; })) {
+        alert('Indicator ' + type + ' sudah ditambahkan!');
+        return;
+    }
+    
+    var id = Date.now();
+    var series = [];
+    
+    if (type === 'SMA') {
+        var s = chart.addLineSeries({ color: '#00d4ff', lineWidth: 2, title: 'SMA(20)', priceLineVisible: false });
+        s.setData(calcSMA(allData, 20));
+        series.push({ s: s, calc: function(data) { return calcSMA(data, 20); }, color: '#00d4ff' });
+    } else if (type === 'EMA') {
+        var s = chart.addLineSeries({ color: '#ff9800', lineWidth: 2, title: 'EMA(20)', priceLineVisible: false });
+        s.setData(calcEMA(allData, 20));
+        series.push({ s: s, calc: function(data) { return calcEMA(data, 20); }, color: '#ff9800' });
+    } else if (type === 'BB') {
+        var bb = calcBB(allData, 20, 2);
+        var su = chart.addLineSeries({ color: '#2196f3', lineWidth: 1, title: 'BB Upper' });
+        var sm = chart.addLineSeries({ color: '#ff9800', lineWidth: 1, title: 'BB Middle' });
+        var sl = chart.addLineSeries({ color: '#2196f3', lineWidth: 1, title: 'BB Lower' });
+        su.setData(bb.upper); sm.setData(bb.middle); sl.setData(bb.lower);
+        series.push({ s: su, calc: function(d) { return calcBB(d, 20, 2).upper; }, color: '#2196f3' });
+        series.push({ s: sm, calc: function(d) { return calcBB(d, 20, 2).middle; }, color: '#ff9800' });
+        series.push({ s: sl, calc: function(d) { return calcBB(d, 20, 2).lower; }, color: '#2196f3' });
+    } else if (type === 'RSI') {
+        var s = chart.addLineSeries({ color: '#9c27b0', lineWidth: 2, title: 'RSI(14)', priceScaleId: 'rsi' });
+        s.setData(calcRSI(allData, 14));
+        series.push({ s: s, calc: function(d) { return calcRSI(d, 14); }, color: '#9c27b0' });
+    } else if (type === 'MACD') {
+        var m = calcMACD(allData, 12, 26, 9);
+        var sm = chart.addLineSeries({ color: '#2196f3', lineWidth: 2, title: 'MACD', priceScaleId: 'macd' });
+        var ss = chart.addLineSeries({ color: '#ff9800', lineWidth: 1, title: 'Signal', priceScaleId: 'macd' });
+        var sh = chart.addHistogramSeries({ color: '#3fb950', title: 'Histogram', priceScaleId: 'macd' });
+        sm.setData(m.macd); ss.setData(m.signal); sh.setData(m.histogram);
+        series.push({ s: sm, calc: function(d) { return calcMACD(d, 12, 26, 9).macd; }, color: '#2196f3' });
+        series.push({ s: ss, calc: function(d) { return calcMACD(d, 12, 26, 9).signal; }, color: '#ff9800' });
+        series.push({ s: sh, calc: function(d) { return calcMACD(d, 12, 26, 9).histogram; }, color: '#3fb950' });
+    } else if (type === 'VOLUME') {
+        // Volume udah ada, jadi skip
+        return;
+    }
+    
+    indicatorList.push({ id: id, type: type, series: series });
+    updateIndicatorList();
+    closeIndicatorModal();
+}
+
+function removeIndicator(id) {
+    var idx = indicatorList.findIndex(function(i) { return i.id === id; });
+    if (idx === -1) return;
+    indicatorList[idx].series.forEach(function(item) {
+        chart.removeSeries(item.s);
+    });
+    indicatorList.splice(idx, 1);
+    updateIndicatorList();
+}
+
+function refreshIndicators() {
+    var inds = indicatorList.slice();
+    inds.forEach(function(ind) { removeIndicator(ind.id); });
+    inds.forEach(function(ind) { addIndicator(ind.type); });
+}
+
+function updateIndicatorList() {
+    var list = document.getElementById('indicatorList');
+    var count = document.getElementById('indicatorCount');
+    if (!list) return;
+    
+    list.innerHTML = indicatorList.map(function(ind) {
+        return '<div class="flex items-center justify-between px-2 py-1.5 rounded-md bg-[#21262d] group">' +
+            '<div class="flex items-center gap-2">' +
+            '<div class="w-1.5 h-1.5 rounded-full" style="background:' + (ind.series[0] ? ind.series[0].color : '#00d4ff') + '"></div>' +
+            '<span class="text-xs text-[#f0f6fc] font-mono">' + ind.type + '</span>' +
+            '</div>' +
+            '<button onclick="window.removeIndicator(' + ind.id + ')" class="text-[#8b949e] hover:text-[#f85149] opacity-0 group-hover:opacity-100">' +
+            '<i data-lucide="x" class="w-3 h-3"></i>' +
+            '</button></div>';
+    }).join('');
+    
+    if (count) count.textContent = indicatorList.length;
+    if (window.lucide) window.lucide.createIcons();
 }
 
 // ==================== WATCHLIST ====================
@@ -372,8 +639,7 @@ function renderWatchlist() {
     if (!container) return;
     
     var html = '';
-    for (var i = 0; i < WATCHLIST.length; i++) {
-        var sym = WATCHLIST[i];
+    WATCHLIST.forEach(function(sym) {
         var info = SYMBOLS[sym] || { color: '#00d4ff', name: sym, basePrice: 100 };
         var seed = 0;
         for (var c = 0; c < sym.length; c++) seed += sym.charCodeAt(c);
@@ -385,27 +651,133 @@ function renderWatchlist() {
         html += '<div class="watchlist-item flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-[#21262d] cursor-pointer" data-symbol="' + sym + '">';
         html += '<div class="flex items-center gap-2">';
         html += '<div class="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-white" style="background:' + info.color + '">' + sym.charAt(0) + '</div>';
-        html += '<div>';
-        html += '<div class="text-sm text-[#f0f6fc]">' + sym + '</div>';
-        html += '<div class="text-[10px] text-[#8b949e]">' + info.name + '</div>';
-        html += '</div></div>';
-        html += '<div class="text-right">';
-        html += '<div class="text-sm font-mono text-[#f0f6fc]">' + price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</div>';
+        html += '<div><div class="text-sm text-[#f0f6fc]">' + sym + '</div>';
+        html += '<div class="text-[10px] text-[#8b949e]">' + info.name + '</div></div></div>';
+        html += '<div class="text-right"><div class="text-sm font-mono text-[#f0f6fc]">' + price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</div>';
         html += '<div class="text-xs font-mono" style="color:' + color + '">' + sign + change.toFixed(2) + '%</div>';
         html += '</div></div>';
-    }
+    });
     container.innerHTML = html;
     
     document.getElementById('watchlistCount').textContent = WATCHLIST.length;
-    
-    var items = container.querySelectorAll('.watchlist-item');
-    for (var j = 0; j < items.length; j++) {
-        items[j].addEventListener('click', function() {
+    container.querySelectorAll('.watchlist-item').forEach(function(item) {
+        item.addEventListener('click', function() {
             loadSymbol(this.getAttribute('data-symbol'));
         });
-    }
+    });
+}
+
+// ==================== REPLAY ====================
+function initReplay() {
+    var replayDate = document.getElementById('replayDate');
+    var replayTime = document.getElementById('replayTime');
     
-    console.log('Watchlist rendered:', WATCHLIST.length, 'items');
+    // Set default date ke 30 hari yang lalu
+    var defaultDate = new Date();
+    defaultDate.setDate(defaultDate.getDate() - 30);
+    replayDate.value = defaultDate.toISOString().split('T')[0];
+    
+    document.getElementById('replayGoTo').addEventListener('click', function() {
+        var dateStr = replayDate.value;
+        var timeStr = replayTime.value || '00:00';
+        if (!dateStr) { alert('Pilih tanggal dulu!'); return; }
+        
+        var targetDate = new Date(dateStr + 'T' + timeStr + ':00Z');
+        var targetTime = Math.floor(targetDate.getTime() / 1000);
+        
+        // Cari index bar terdekat
+        var foundIndex = 0;
+        for (var i = 0; i < fullHistory.length; i++) {
+            if (fullHistory[i].time >= targetTime) {
+                foundIndex = i;
+                break;
+            }
+        }
+        
+        replayIndex = foundIndex;
+        allData = fullHistory.slice(0, replayIndex);
+        candleSeries.setData(allData);
+        
+        var progress = (replayIndex / fullHistory.length) * 100;
+        document.getElementById('replayProgress').style.width = progress + '%';
+        document.getElementById('replayInfo').textContent = replayIndex + ' / ' + fullHistory.length;
+        
+        // Pause live updates saat replay
+        stopLiveUpdates();
+    });
+    
+    document.getElementById('replayStart').addEventListener('click', function() {
+        if (replayTimer) return;
+        stopLiveUpdates();
+        
+        replayTimer = setInterval(function() {
+            if (replayIndex >= fullHistory.length) {
+                clearInterval(replayTimer);
+                replayTimer = null;
+                return;
+            }
+            var bar = fullHistory[replayIndex];
+            allData.push(bar);
+            candleSeries.update(bar);
+            replayIndex++;
+            
+            var progress = (replayIndex / fullHistory.length) * 100;
+            document.getElementById('replayProgress').style.width = progress + '%';
+            document.getElementById('replayInfo').textContent = replayIndex + ' / ' + fullHistory.length;
+        }, 1000 / replaySpeed);
+    });
+    
+    document.getElementById('replayPause').addEventListener('click', function() {
+        if (replayTimer) { clearInterval(replayTimer); replayTimer = null; }
+    });
+    
+    document.getElementById('replayStep').addEventListener('click', function() {
+        if (replayIndex < fullHistory.length) {
+            var bar = fullHistory[replayIndex];
+            allData.push(bar);
+            candleSeries.update(bar);
+            replayIndex++;
+            
+            var progress = (replayIndex / fullHistory.length) * 100;
+            document.getElementById('replayProgress').style.width = progress + '%';
+            document.getElementById('replayInfo').textContent = replayIndex + ' / ' + fullHistory.length;
+        }
+    });
+    
+    document.getElementById('replayReset').addEventListener('click', function() {
+        if (replayTimer) { clearInterval(replayTimer); replayTimer = null; }
+        replayIndex = 0;
+        allData = fullHistory.slice();
+        candleSeries.setData(allData);
+        document.getElementById('replayProgress').style.width = '0%';
+        document.getElementById('replayInfo').textContent = '0 / ' + fullHistory.length;
+        startLiveUpdates();
+    });
+    
+    document.getElementById('replaySpeedUp').addEventListener('click', function() {
+        replaySpeed = Math.min(replaySpeed * 2, 64);
+        document.getElementById('replaySpeedLabel').textContent = replaySpeed + 'x';
+    });
+    
+    document.getElementById('replaySpeedDown').addEventListener('click', function() {
+        replaySpeed = Math.max(replaySpeed / 2, 0.25);
+        document.getElementById('replaySpeedLabel').textContent = replaySpeed + 'x';
+    });
+    
+    document.getElementById('replayInfo').textContent = '0 / ' + fullHistory.length;
+}
+
+function stopLiveUpdates() {
+    if (liveUpdateTimer) { clearInterval(liveUpdateTimer); liveUpdateTimer = null; }
+}
+
+// ==================== MODAL ====================
+function openIndicatorModal() {
+    document.getElementById('indicatorModal').classList.add('active');
+}
+
+function closeIndicatorModal() {
+    document.getElementById('indicatorModal').classList.remove('active');
 }
 
 // ==================== SEARCH ====================
@@ -418,38 +790,29 @@ function initSearch() {
         var query = e.target.value.toUpperCase().trim();
         if (!query) { dropdown.style.display = 'none'; return; }
         
-        var matches = [];
-        for (var sym in SYMBOLS) {
-            if (sym.indexOf(query) !== -1 || SYMBOLS[sym].name.toUpperCase().indexOf(query) !== -1) {
-                matches.push(sym);
-                if (matches.length >= 10) break;
-            }
-        }
+        var matches = Object.keys(SYMBOLS).filter(function(sym) {
+            return sym.indexOf(query) !== -1 || SYMBOLS[sym].name.toUpperCase().indexOf(query) !== -1;
+        }).slice(0, 10);
         
         if (matches.length === 0) { dropdown.style.display = 'none'; return; }
         
-        var html = '';
-        for (var i = 0; i < matches.length; i++) {
-            var sym = matches[i];
+        dropdown.innerHTML = matches.map(function(sym) {
             var info = SYMBOLS[sym];
-            html += '<div class="search-result flex items-center gap-2 px-3 py-2 hover:bg-[#21262d] cursor-pointer border-b border-[#30363d]" data-symbol="' + sym + '">';
-            html += '<div class="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-white" style="background:' + info.color + '">' + sym.charAt(0) + '</div>';
-            html += '<div>';
-            html += '<div class="text-sm text-[#f0f6fc]">' + sym + '</div>';
-            html += '<div class="text-[10px] text-[#8b949e]">' + info.name + '</div>';
-            html += '</div></div>';
-        }
-        dropdown.innerHTML = html;
+            return '<div class="search-result flex items-center gap-2 px-3 py-2 hover:bg-[#21262d] cursor-pointer border-b border-[#30363d]" data-symbol="' + sym + '">' +
+                '<div class="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-white" style="background:' + info.color + '">' + sym.charAt(0) + '</div>' +
+                '<div><div class="text-sm text-[#f0f6fc]">' + sym + '</div>' +
+                '<div class="text-[10px] text-[#8b949e]">' + info.name + '</div></div></div>';
+        }).join('');
+        
         dropdown.style.display = 'block';
         
-        var results = dropdown.querySelectorAll('.search-result');
-        for (var j = 0; j < results.length; j++) {
-            results[j].addEventListener('click', function() {
+        dropdown.querySelectorAll('.search-result').forEach(function(el) {
+            el.addEventListener('click', function() {
                 loadSymbol(this.getAttribute('data-symbol'));
                 dropdown.style.display = 'none';
                 input.value = this.getAttribute('data-symbol');
             });
-        }
+        });
     });
     
     input.addEventListener('keypress', function(e) {
@@ -460,59 +823,13 @@ function initSearch() {
     });
 }
 
-// ==================== REPLAY ====================
-function initReplay() {
-    var startBtn = document.getElementById('replayStart');
-    var pauseBtn = document.getElementById('replayPause');
-    var stepBtn = document.getElementById('replayStep');
-    var resetBtn = document.getElementById('replayReset');
-    
-    if (startBtn) startBtn.addEventListener('click', function() {
-        if (replayTimer) return;
-        var speed = parseInt(document.getElementById('replaySpeed').value) || 1;
-        replayTimer = setInterval(function() {
-            if (replayIndex >= allData.length) {
-                clearInterval(replayTimer);
-                replayTimer = null;
-                return;
-            }
-            candleSeries.update(allData[replayIndex]);
-            replayIndex++;
-            var progress = (replayIndex / allData.length) * 100;
-            document.getElementById('replayProgress').style.width = progress + '%';
-        }, 1000 / speed);
-    });
-    
-    if (pauseBtn) pauseBtn.addEventListener('click', function() {
-        if (replayTimer) { clearInterval(replayTimer); replayTimer = null; }
-    });
-    
-    if (resetBtn) resetBtn.addEventListener('click', function() {
-        if (replayTimer) { clearInterval(replayTimer); replayTimer = null; }
-        replayIndex = 0;
-        document.getElementById('replayProgress').style.width = '0%';
-        loadSymbol(currentSymbol);
-    });
-    
-    if (stepBtn) stepBtn.addEventListener('click', function() {
-        if (replayIndex < allData.length) {
-            candleSeries.update(allData[replayIndex]);
-            replayIndex++;
-            var progress = (replayIndex / allData.length) * 100;
-            document.getElementById('replayProgress').style.width = progress + '%';
-        }
-    });
-}
-
 // ==================== EVENTS ====================
 function initEvents() {
-    // Timeframe buttons
-    var tfBtns = document.querySelectorAll('.tf-btn');
-    for (var i = 0; i < tfBtns.length; i++) {
-        tfBtns[i].addEventListener('click', function() {
-            for (var j = 0; j < tfBtns.length; j++) {
-                tfBtns[j].className = 'tf-btn px-3 py-1 text-xs font-medium rounded text-[#8b949e] hover:text-[#f0f6fc] hover:bg-[#21262d]';
-            }
+    document.querySelectorAll('.tf-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tf-btn').forEach(function(b) {
+                b.className = 'tf-btn px-3 py-1 text-xs font-medium rounded text-[#8b949e] hover:text-[#f0f6fc] hover:bg-[#21262d]';
+            });
             this.className = 'tf-btn px-3 py-1 text-xs font-medium rounded text-[#f0f6fc] bg-[#00d4ff]/20 border border-[#00d4ff]/30';
             currentTimeframe = this.getAttribute('data-tf');
             var label = currentTimeframe === 'D' ? '1D' : currentTimeframe === 'W' ? '1W' : currentTimeframe + 'm';
@@ -520,20 +837,30 @@ function initEvents() {
             document.getElementById('statusTimeframe').textContent = label;
             loadSymbol(currentSymbol);
         });
-    }
+    });
     
-    // Tool buttons
-    var toolBtns = document.querySelectorAll('.tool-btn');
-    for (var i = 0; i < toolBtns.length; i++) {
-        toolBtns[i].addEventListener('click', function() {
-            for (var j = 0; j < toolBtns.length; j++) {
-                toolBtns[j].className = 'tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]';
-            }
+    document.querySelectorAll('.tool-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tool-btn').forEach(function(b) {
+                b.className = 'tool-btn w-9 h-9 flex items-center justify-center rounded-md text-[#8b949e] hover:bg-[#21262d]';
+            });
             this.className = 'tool-btn w-9 h-9 flex items-center justify-center rounded-md bg-[#00d4ff]/20 text-[#00d4ff]';
         });
-    }
+    });
     
-    // Clock
+    document.getElementById('addIndicatorBtn').addEventListener('click', openIndicatorModal);
+    document.getElementById('closeIndicatorModal').addEventListener('click', closeIndicatorModal);
+    
+    document.querySelectorAll('.indicator-option').forEach(function(opt) {
+        opt.addEventListener('click', function() {
+            addIndicator(this.getAttribute('data-indicator'));
+        });
+    });
+    
+    document.getElementById('indicatorModal').addEventListener('click', function(e) {
+        if (e.target === this) closeIndicatorModal();
+    });
+    
     setInterval(function() {
         var now = new Date();
         document.getElementById('statusTime').textContent = now.toLocaleTimeString('en-GB', { hour12: false, timeZone: 'UTC' });
@@ -542,42 +869,25 @@ function initEvents() {
 
 // ==================== START ====================
 window.addEventListener('load', function() {
-    console.log('=== NEBOLUS TERMINAL STARTING ===');
+    console.log('=== NEBOLUS TERMINAL v2.0 ===');
     
-    // Init icons
-    if (window.lucide) {
-        lucide.createIcons();
-        console.log('Lucide icons initialized');
-    }
+    if (window.lucide) lucide.createIcons();
+    if (typeof LightweightCharts === 'undefined') { alert('Chart library gagal load!'); return; }
     
-    // Check library
-    if (typeof LightweightCharts === 'undefined') {
-        console.error('LightweightCharts library NOT LOADED');
-        alert('Chart library gagal load. Cek koneksi internet lo.');
-        return;
-    }
-    console.log('LightweightCharts version:', LightweightCharts.version ? LightweightCharts.version() : 'unknown');
-    
-    // Init chart
     initChart();
-    
-    // Render watchlist
     renderWatchlist();
-    
-    // Load symbol
     loadSymbol('BTCUSD');
-    
-    // Init search
     initSearch();
-    
-    // Init replay
     initReplay();
-    
-    // Init events
     initEvents();
     
-    console.log('=== NEBOLUS TERMINAL READY ===');
+    // Start live updates
+    startLiveUpdates();
+    
+    console.log('=== READY ===');
 });
+
+window.removeIndicator = removeIndicator;
 </script>
 </body>
 </html>
